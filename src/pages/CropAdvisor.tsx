@@ -255,6 +255,14 @@ const CropAdvisor = () => {
             animate={{ opacity: 1 }}
             className="space-y-4"
           >
+            {/* AI Transparency */}
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/50 border border-border/50">
+              <Bot size={14} className="text-muted-foreground" />
+              <span className="text-[10px] text-muted-foreground">
+                🤖 AI द्वारा उत्पन्न — कृपया स्थानीय कृषि विशेषज्ञ से पुष्टि करें
+              </span>
+            </div>
+
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-foreground">🌾 Recommendations</h3>
               <button

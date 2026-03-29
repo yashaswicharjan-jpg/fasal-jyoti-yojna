@@ -139,14 +139,14 @@ const Dashboard = () => {
                 {frostAlert && (
                   <div className="flex items-center gap-2 p-3 mb-3 rounded-xl bg-destructive/15 border border-destructive/30">
                     <AlertTriangle size={18} className="text-destructive flex-shrink-0" />
-                    <p className="text-sm font-medium text-foreground">❄️ पाला चेतावनी — फसल ढकें!</p>
+                    <p className="text-sm font-medium text-foreground">{t('dashboard.frost_warning')}</p>
                   </div>
                 )}
 
                 {heatAlert && (
                   <div className="flex items-center gap-2 p-3 mb-3 rounded-xl bg-accent/20 border border-accent/30">
                     <AlertTriangle size={18} className="text-accent flex-shrink-0" />
-                    <p className="text-sm font-medium text-foreground">🔥 अगले 3 दिन तेज गर्मी — सिंचाई बढ़ाएं!</p>
+                    <p className="text-sm font-medium text-foreground">{t('dashboard.heat_warning')}</p>
                   </div>
                 )}
 

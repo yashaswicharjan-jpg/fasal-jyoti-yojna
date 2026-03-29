@@ -61,7 +61,7 @@ const CropAdvisor = () => {
       setResults(r);
     } catch (err) {
       console.error('Crop advisor error:', err);
-      toast.error('AI recommendation failed. Showing sample data.');
+      toast.error(t('crops.ai_failed'));
       setResults([
         { CropName: 'Soybean', CropNameHindi: 'सोयाबीन', Emoji: '🫘', YieldPerAcre: '8-10 quintals', GrowingPeriod: '90-120 days', MarketPrice: '₹4,500/quintal', EstimatedProfit: '₹25,000-35,000', WaterRequirement: 'Medium', BestSowingTime: 'June 15 - July 15', KeyTips: ['Use Rhizobium culture', 'Row spacing 30-45cm', 'Apply phosphorus at sowing'], GovernmentScheme: 'PM-KISAN', Confidence: '92%' },
         { CropName: 'Cotton', CropNameHindi: 'कपास', Emoji: '🏵️', YieldPerAcre: '6-8 quintals', GrowingPeriod: '150-180 days', MarketPrice: '₹6,500/quintal', EstimatedProfit: '₹30,000-42,000', WaterRequirement: 'Medium', BestSowingTime: 'May 15 - June 30', KeyTips: ['Use BT cotton', 'Apply Neem cake', 'Regular pest monitoring'], GovernmentScheme: 'Fasal Bima Yojana', Confidence: '87%' },
@@ -179,11 +179,11 @@ const CropAdvisor = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/50 border border-border/50">
               <Bot size={14} className="text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground">🤖 AI द्वारा उत्पन्न — कृपया स्थानीय कृषि विशेषज्ञ से पुष्टि करें</span>
+              <span className="text-[10px] text-muted-foreground">{t('diagnose.ai_label')}</span>
             </div>
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-foreground">🌾 Recommendations</h3>
-              <button onClick={() => { setResults(null); setStep(1); }} className="text-sm text-primary font-medium min-h-[44px] px-3">New Search</button>
+              <h3 className="text-lg font-bold text-foreground">{t('crops.recommendations')}</h3>
+              <button onClick={() => { setResults(null); setStep(1); }} className="text-sm text-primary font-medium min-h-[44px] px-3">{t('crops.new_search')}</button>
             </div>
             <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 scrollbar-hide">
               {results.map((crop, i) => (

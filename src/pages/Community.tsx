@@ -82,14 +82,14 @@ const Community = () => {
     });
 
     if (error) {
-      toast.error('पोस्ट नहीं हो सकी');
+      toast.error(t('auth.post_failed'));
       console.error(error);
       return;
     }
 
     setNewPost('');
     setShowCompose(false);
-    toast.success('पोस्ट सफल!');
+    toast.success(t('auth.post_success'));
   };
 
   const timeAgo = (dateStr: string) => {
@@ -126,7 +126,7 @@ const Community = () => {
           </GlassCard>
         ) : filteredPosts.length === 0 ? (
           <GlassCard className="flex flex-col items-center justify-center py-8">
-            <p className="text-muted-foreground text-sm">कोई पोस्ट नहीं मिली। पहले पोस्ट करें!</p>
+            <p className="text-muted-foreground text-sm">{t('community.no_posts')}</p>
           </GlassCard>
         ) : (
           filteredPosts.map((post, i) => (
@@ -135,7 +135,7 @@ const Community = () => {
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">👨‍🌾</span>
                   <div className="flex-1">
-                    <p className="font-semibold text-foreground text-sm">{post.profiles?.full_name || 'किसान'}</p>
+                    <p className="font-semibold text-foreground text-sm">{post.profiles?.full_name || t('community.farmer')}</p>
                     <p className="text-xs text-muted-foreground">{post.profiles?.state || ''} · {timeAgo(post.created_at)}</p>
                   </div>
                   <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold ${post.category === 'question' ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'}`}>

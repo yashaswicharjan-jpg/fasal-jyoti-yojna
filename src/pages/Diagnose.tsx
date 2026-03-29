@@ -75,7 +75,7 @@ const Diagnose = () => {
       }
     } catch (err: any) {
       console.error('AI analysis error:', err);
-      toast.error('AI analysis failed. Please try again.');
+      toast.error(t('diagnose.analysis_failed'));
       // Fallback mock data
       if (mode === 'disease') {
         setResult({
@@ -165,7 +165,7 @@ const Diagnose = () => {
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }} className="space-y-4">
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/50 border border-border/50">
                 <Bot size={14} className="text-muted-foreground" />
-                <span className="text-[10px] text-muted-foreground">🤖 AI द्वारा उत्पन्न — कृपया स्थानीय कृषि विशेषज्ञ से पुष्टि करें</span>
+                <span className="text-[10px] text-muted-foreground">{t('diagnose.ai_label')}</span>
               </div>
 
               {mode === 'disease' ? (
@@ -223,7 +223,7 @@ const Diagnose = () => {
                   <div className="flex gap-3">
                     <button onClick={() => shareOnWhatsApp(formatDiseaseForWhatsApp(result, i18n.language))}
                       className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary/10 text-secondary font-medium min-h-[48px]">
-                      <Share2 size={16} />WhatsApp पर भेजो
+                      <Share2 size={16} />{t('diagnose.share_whatsapp')}
                     </button>
                   </div>
                 </>

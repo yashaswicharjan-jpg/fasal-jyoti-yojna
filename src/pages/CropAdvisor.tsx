@@ -339,6 +339,15 @@ const CropAdvisor = () => {
                           <p className="text-sm font-medium text-accent">{crop.GovernmentScheme}</p>
                         </div>
                       )}
+                      <div className="flex gap-2 pt-2">
+                        <SpeakButton text={`${crop.CropNameHindi}. उपज ${crop.YieldPerAcre}. लाभ ${crop.EstimatedProfit}. बुवाई ${crop.BestSowingTime}`} />
+                        <button
+                          onClick={(e) => { e.stopPropagation(); shareOnWhatsApp(formatCropForWhatsApp(crop)); }}
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary/10 text-secondary text-xs font-medium min-h-[40px]"
+                        >
+                          <Share2 size={14} /> WhatsApp
+                        </button>
+                      </div>
                     </motion.div>
                   )}
                 </GlassCard>
@@ -346,7 +355,7 @@ const CropAdvisor = () => {
             </div>
 
             <div className="flex justify-center gap-1.5">
-              {results.map((_, i) => (
+              {results.map((_: any, i: number) => (
                 <div key={i} className="w-2 h-2 rounded-full bg-primary/30" />
               ))}
             </div>

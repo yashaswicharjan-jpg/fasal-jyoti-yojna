@@ -7,6 +7,20 @@
     "community": "Community",
     "profile": "Profile"
   },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "your_name": "Your Name",
+    "login_btn": "Log In",
+    "signup_btn": "Create Account",
+    "tagline": "AI-powered farming assistant",
+    "name_required": "Please enter your name",
+    "signup_success": "Account created! Please verify your email.",
+    "post_failed": "Post failed",
+    "post_success": "Posted successfully!"
+  },
   "dashboard": {
     "welcome": "Welcome, Farmer!",
     "weather": "Today's Weather",
@@ -15,6 +29,8 @@
     "rain_chance": "Rain Chance",
     "wind": "Wind",
     "skip_irrigation": "Skip irrigation today — rain expected!",
+    "frost_warning": "❄️ Frost Warning — Cover your crops!",
+    "heat_warning": "🔥 Extreme heat next 3 days — increase irrigation!",
     "quick_actions": "Quick Actions",
     "soil_analysis": "Soil Analysis",
     "my_crops": "My Crops",
@@ -41,7 +57,10 @@
     "confidence": "Confidence",
     "save_history": "Save to History",
     "share": "Share",
-    "no_image": "Upload or capture an image to begin diagnosis"
+    "no_image": "Upload or capture an image to begin diagnosis",
+    "ai_label": "🤖 AI Generated — Please confirm with local agriculture expert",
+    "share_whatsapp": "Share on WhatsApp",
+    "analysis_failed": "AI analysis failed. Please try again."
   },
   "crops": {
     "title": "Crop Advisor",
@@ -70,7 +89,10 @@
     "canal": "Canal",
     "borewell": "Borewell",
     "rainfed": "Rain-fed",
-    "drip": "Drip"
+    "drip": "Drip",
+    "recommendations": "🌾 Recommendations",
+    "new_search": "New Search",
+    "ai_failed": "AI recommendation failed. Showing sample data."
   },
   "community": {
     "title": "Farmer Community",
@@ -84,7 +106,9 @@
     "share": "Share",
     "write_post": "What's on your mind?",
     "post": "Post",
-    "no_posts": "No posts yet. Be the first to share!"
+    "no_posts": "No posts yet. Be the first to share!",
+    "farmer": "Farmer",
+    "no_reports": "No AI reports yet"
   },
   "profile": {
     "title": "Profile",
@@ -100,7 +124,11 @@
     "logout": "Log Out",
     "member_since": "Member since",
     "clear_history": "Clear All History",
-    "dark_mode": "Dark Mode"
+    "dark_mode": "Dark Mode",
+    "land": "Land",
+    "main_crop": "Main Crop",
+    "village": "Village",
+    "state": "State"
   },
   "chatbot": {
     "title": "Kisan Dost",
@@ -109,7 +137,8 @@
     "send": "Send",
     "voice": "Voice",
     "camera": "Camera",
-    "upload": "Upload"
+    "upload": "Upload",
+    "error": "Sorry, something went wrong. Please try again. 🙏"
   },
   "common": {
     "loading": "Loading...",

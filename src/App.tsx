@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence, motion } from "framer-motion";
 import BottomNav from "@/components/BottomNav";
 import KisanDostChatbot from "@/components/KisanDostChatbot";
+import OfflineBanner from "@/components/OfflineBanner";
+import InstallPrompt from "@/components/InstallPrompt";
 import Dashboard from "@/pages/Dashboard";
 import Diagnose from "@/pages/Diagnose";
 import CropAdvisor from "@/pages/CropAdvisor";
@@ -13,19 +15,22 @@ import Profile from "@/pages/Profile";
 import NotFound from "@/pages/NotFound";
 import { useEffect } from "react";
 import { useAppStore } from "@/store/useAppStore";
+import { useConnectivity } from "@/utils/connectivity";
 
 const queryClient = new QueryClient();
 
 const AnimatedRoutes = () => {
   const location = useLocation();
+  const { isSlowConnection } = useConnectivity();
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
         key={location.pathname}
-        initial={{ opacity: 0, y: 20 }}
+        initial={isSlowConnection ? undefined : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        transition={{ duration: 0.25 }}
+        exit={isSlowConnection ? undefined : { opacity: 0, y: -10 }}
+        transition={{ duration: isSlowConnection ? 0 : 0.25 }}
       >
         <Routes location={location}>
           <Route path="/" element={<Dashboard />} />
@@ -48,15 +53,43 @@ const ThemeInitializer = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Register service worker (only in production, not in iframe)
+const registerSW = () => {
+  if (!('serviceWorker' in navigator)) return;
+
+  const isInIframe = (() => {
+    try { return window.self !== window.top; } catch { return true; }
+  })();
+  const isPreviewHost =
+    window.location.hostname.includes('id-preview--') ||
+    window.location.hostname.includes('lovableproject.com');
+
+  if (isPreviewHost || isInIframe) {
+    // Unregister any existing SW in preview
+    navigator.serviceWorker?.getRegistrations().then((regs) => {
+      regs.forEach((r) => r.unregister());
+    });
+    return;
+  }
+
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+};
+
+registerSW();
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Sonner />
       <ThemeInitializer>
         <BrowserRouter>
+          <OfflineBanner />
           <AnimatedRoutes />
           <BottomNav />
           <KisanDostChatbot />
+          <InstallPrompt />
         </BrowserRouter>
       </ThemeInitializer>
     </TooltipProvider>

@@ -1,38 +1,55 @@
 import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Image, Upload, Scan, Shield, Leaf, FlaskConical } from 'lucide-react';
+import { Camera, Image, Scan, Shield, Leaf, FlaskConical, Share2, Bot } from 'lucide-react';
 import TopBar from '@/components/TopBar';
 import GlassCard from '@/components/GlassCard';
 import SeedLoader from '@/components/SeedLoader';
+import SpeakButton from '@/components/SpeakButton';
+import { compressImage, formatBytes } from '@/utils/imageCompression';
+import { shareOnWhatsApp, formatDiseaseForWhatsApp } from '@/utils/sharing';
 
 type Mode = 'disease' | 'soil';
 type Tab = 'chemical' | 'organic' | 'prevention';
 
 const Diagnose = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [mode, setMode] = useState<Mode>('disease');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<Tab>('chemical');
+  const [compressionInfo, setCompressionInfo] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      setImagePreview(reader.result as string);
-      setResult(null);
-    };
-    reader.readAsDataURL(file);
+
+    setCompressionInfo(
+      i18n.language === 'hi' ? 'छवि अनुकूलित हो रही है...' : 'Optimizing image...'
+    );
+
+    try {
+      const compressed = await compressImage(file);
+      setImagePreview(compressed.dataUrl);
+      setCompressionInfo(
+        `${formatBytes(compressed.originalSize)} → ${formatBytes(compressed.compressedSize)}`
+      );
+      setTimeout(() => setCompressionInfo(null), 3000);
+    } catch {
+      // Fallback to raw preview
+      const reader = new FileReader();
+      reader.onload = () => setImagePreview(reader.result as string);
+      reader.readAsDataURL(file);
+      setCompressionInfo(null);
+    }
+    setResult(null);
   };
 
   const handleAnalyze = async () => {
     if (!imagePreview) return;
     setAnalyzing(true);
-    // Simulate AI analysis for now (Gemini integration placeholder)
     await new Promise((r) => setTimeout(r, 2500));
 
     if (mode === 'disease') {
@@ -56,7 +73,7 @@ const Diagnose = () => {
         Fertility: 'Medium',
         RecommendedCrops: ['Cotton', 'Soybean', 'Sorghum'],
         Deficiencies: ['Zinc', 'Iron'],
-        Amendments: 'Add Zinc Sulphate (25 kg/ha) and FeSO4 (50 kg/ha). Add organic manure for better structure.',
+        Amendments: 'Add Zinc Sulphate (25 kg/ha) and FeSO4 (50 kg/ha). Add organic manure.',
       });
     }
     setAnalyzing(false);
@@ -66,6 +83,14 @@ const Diagnose = () => {
     if (s === 'Low') return 'bg-secondary text-secondary-foreground';
     if (s === 'Medium') return 'bg-accent text-accent-foreground';
     return 'bg-destructive text-destructive-foreground';
+  };
+
+  const getResultSpeechText = () => {
+    if (!result) return '';
+    if (mode === 'disease') {
+      return `रोग: ${result.DiseaseNameHindi || result.DiseaseName}. गंभीरता: ${result.Severity}. रासायनिक उपचार: ${result.ChemicalCure}, मात्रा ${result.ChemicalDosage}. जैविक विकल्प: ${result.OrganicAlternative}. ${result.ImmediateAction}`;
+    }
+    return `मिट्टी: ${result.SoilType}. pH: ${result.pH}. उपजाऊपन: ${result.Fertility}. सुझाई फसलें: ${result.RecommendedCrops?.join(', ')}`;
   };
 
   return (
@@ -100,6 +125,10 @@ const Diagnose = () => {
             </div>
           )}
 
+          {compressionInfo && (
+            <p className="text-xs text-primary font-medium">📷 {compressionInfo}</p>
+          )}
+
           <div className="flex gap-3 w-full">
             <button
               onClick={() => {
@@ -127,14 +156,13 @@ const Diagnose = () => {
           {imagePreview && !analyzing && !result && (
             <button
               onClick={handleAnalyze}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-secondary text-primary-foreground font-semibold min-h-[48px] transition-all hover:opacity-90"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-secondary text-primary-foreground font-semibold min-h-[48px]"
             >
               {t('diagnose.analyze')}
             </button>
           )}
         </GlassCard>
 
-        {/* Loading */}
         {analyzing && <SeedLoader text={t('diagnose.analyzing')} />}
 
         {/* Results */}
@@ -147,21 +175,31 @@ const Diagnose = () => {
               transition={{ duration: 0.5 }}
               className="space-y-4"
             >
+              {/* AI Transparency Label */}
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/50 border border-border/50">
+                <Bot size={14} className="text-muted-foreground" />
+                <span className="text-[10px] text-muted-foreground">
+                  🤖 AI द्वारा उत्पन्न — कृपया स्थानीय कृषि विशेषज्ञ से पुष्टि करें
+                </span>
+              </div>
+
               {mode === 'disease' ? (
                 <>
                   <GlassCard>
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-lg font-bold text-foreground">{result.DiseaseName}</h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${severityColor(result.Severity)}`}>
-                        {result.Severity}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <SpeakButton text={getResultSpeechText()} />
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${severityColor(result.Severity)}`}>
+                          {result.Severity}
+                        </span>
+                      </div>
                     </div>
                     <p className="text-muted-foreground text-sm mb-1">{result.DiseaseNameHindi}</p>
                     <p className="text-sm text-foreground">{t('diagnose.confidence')}: {result.Confidence}</p>
                     <p className="text-sm text-accent font-medium mt-2">⚡ {result.ImmediateAction}</p>
                   </GlassCard>
 
-                  {/* Tabs */}
                   <div className="flex rounded-xl bg-muted p-1 gap-1">
                     {([
                       { key: 'chemical' as Tab, icon: FlaskConical, label: t('diagnose.chemical') },
@@ -185,7 +223,7 @@ const Diagnose = () => {
                     {activeTab === 'chemical' && (
                       <div className="space-y-2">
                         <p className="font-semibold text-foreground">🧪 {result.ChemicalCure}</p>
-                        <p className="text-sm text-muted-foreground">{t('diagnose.chemical')}: {result.ChemicalDosage}</p>
+                        <p className="text-sm text-muted-foreground">{result.ChemicalDosage}</p>
                       </div>
                     )}
                     {activeTab === 'organic' && (
@@ -205,32 +243,51 @@ const Diagnose = () => {
                       </ul>
                     )}
                   </GlassCard>
+
+                  {/* Action buttons */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => shareOnWhatsApp(formatDiseaseForWhatsApp(result, i18n.language))}
+                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary/10 text-secondary font-medium min-h-[48px]"
+                    >
+                      <Share2 size={16} />
+                      WhatsApp पर भेजो
+                    </button>
+                    <button className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary/10 text-primary font-medium min-h-[48px]">
+                      {t('diagnose.save_history')}
+                    </button>
+                  </div>
                 </>
               ) : (
-                <GlassCard className="space-y-3">
-                  <h3 className="text-lg font-bold text-foreground">{result.SoilType}</h3>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div><span className="text-muted-foreground">pH:</span> <span className="font-medium text-foreground">{result.pH}</span></div>
-                    <div><span className="text-muted-foreground">Fertility:</span> <span className="font-medium text-foreground">{result.Fertility}</span></div>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-1">Recommended Crops:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {result.RecommendedCrops.map((c: string) => (
-                        <span key={c} className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">{c}</span>
-                      ))}
+                <>
+                  <GlassCard className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-bold text-foreground">{result.SoilType}</h3>
+                      <SpeakButton text={getResultSpeechText()} />
                     </div>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-1">Deficiencies:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {result.Deficiencies.map((d: string) => (
-                        <span key={d} className="px-3 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-medium">{d}</span>
-                      ))}
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div><span className="text-muted-foreground">pH:</span> <span className="font-medium text-foreground">{result.pH}</span></div>
+                      <div><span className="text-muted-foreground">Fertility:</span> <span className="font-medium text-foreground">{result.Fertility}</span></div>
                     </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{result.Amendments}</p>
-                </GlassCard>
+                    <div>
+                      <p className="text-sm font-medium text-foreground mb-1">Recommended Crops:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {result.RecommendedCrops.map((c: string) => (
+                          <span key={c} className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">{c}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground mb-1">Deficiencies:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {result.Deficiencies.map((d: string) => (
+                          <span key={d} className="px-3 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-medium">{d}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{result.Amendments}</p>
+                  </GlassCard>
+                </>
               )}
             </motion.div>
           )}

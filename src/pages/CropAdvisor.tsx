@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Sparkles, Share2, Bot } from 'lucide-react';
 import TopBar from '@/components/TopBar';
 import GlassCard from '@/components/GlassCard';
 import SeedLoader from '@/components/SeedLoader';
+import SpeakButton from '@/components/SpeakButton';
+import { shareOnWhatsApp, formatCropForWhatsApp } from '@/utils/sharing';
 
 const soilTypes = [
   { key: 'clay', emoji: '🏔️' },
@@ -253,6 +255,14 @@ const CropAdvisor = () => {
             animate={{ opacity: 1 }}
             className="space-y-4"
           >
+            {/* AI Transparency */}
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/50 border border-border/50">
+              <Bot size={14} className="text-muted-foreground" />
+              <span className="text-[10px] text-muted-foreground">
+                🤖 AI द्वारा उत्पन्न — कृपया स्थानीय कृषि विशेषज्ञ से पुष्टि करें
+              </span>
+            </div>
+
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-foreground">🌾 Recommendations</h3>
               <button
@@ -329,6 +339,15 @@ const CropAdvisor = () => {
                           <p className="text-sm font-medium text-accent">{crop.GovernmentScheme}</p>
                         </div>
                       )}
+                      <div className="flex gap-2 pt-2">
+                        <SpeakButton text={`${crop.CropNameHindi}. उपज ${crop.YieldPerAcre}. लाभ ${crop.EstimatedProfit}. बुवाई ${crop.BestSowingTime}`} />
+                        <button
+                          onClick={(e) => { e.stopPropagation(); shareOnWhatsApp(formatCropForWhatsApp(crop)); }}
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary/10 text-secondary text-xs font-medium min-h-[40px]"
+                        >
+                          <Share2 size={14} /> WhatsApp
+                        </button>
+                      </div>
                     </motion.div>
                   )}
                 </GlassCard>
@@ -336,7 +355,7 @@ const CropAdvisor = () => {
             </div>
 
             <div className="flex justify-center gap-1.5">
-              {results.map((_, i) => (
+              {results.map((_: any, i: number) => (
                 <div key={i} className="w-2 h-2 rounded-full bg-primary/30" />
               ))}
             </div>

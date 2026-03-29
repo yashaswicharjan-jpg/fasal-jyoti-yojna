@@ -97,7 +97,7 @@ const KisanDostChatbot = () => {
       console.error('Chat error:', err);
       setMessages((prev) => [
         ...prev,
-        { id: Date.now().toString(), role: 'assistant', content: 'माफ़ करें, कुछ गड़बड़ हो गई। कृपया दोबारा कोशिश करें। 🙏', timestamp: new Date() },
+        { id: Date.now().toString(), role: 'assistant', content: t('chatbot.error'), timestamp: new Date() },
       ]);
     }
     setIsTyping(false);

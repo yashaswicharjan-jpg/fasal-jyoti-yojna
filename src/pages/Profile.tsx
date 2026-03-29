@@ -48,9 +48,9 @@ const Profile = () => {
               </button>
             </div>
             <div className="text-center">
-              <h3 className="text-xl font-bold text-foreground">{profile?.full_name || 'किसान जी'}</h3>
+              <h3 className="text-xl font-bold text-foreground">{profile?.full_name || t('community.farmer')}</h3>
               <p className="text-sm text-muted-foreground flex items-center gap-1 justify-center">
-                <MapPin size={12} /> {profile?.location_village || 'गाँव'}, {profile?.state || 'राज्य'}
+                <MapPin size={12} /> {profile?.location_village || t('profile.village')}, {profile?.state || t('profile.state')}
               </p>
               <p className="text-xs text-muted-foreground flex items-center gap-1 justify-center mt-1">
                 <Calendar size={12} /> {t('profile.member_since')} {profile?.created_at ? new Date(profile.created_at).getFullYear() : '2024'}
@@ -72,9 +72,9 @@ const Profile = () => {
           {activeTab === 'farm' && (
             <GlassCard className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div><p className="text-xs text-muted-foreground">जमीन</p><p className="font-semibold text-foreground">5 {t('common.acres')}</p></div>
+              <div><p className="text-xs text-muted-foreground">{t('profile.land')}</p><p className="font-semibold text-foreground">5 {t('common.acres')}</p></div>
                 <div><p className="text-xs text-muted-foreground">{t('crops.soil_type')}</p><p className="font-semibold text-foreground">{t('crops.black')}</p></div>
-                <div><p className="text-xs text-muted-foreground">मुख्य फसल</p><p className="font-semibold text-foreground">सोयाबीन</p></div>
+                <div><p className="text-xs text-muted-foreground">{t('profile.main_crop')}</p><p className="font-semibold text-foreground">सोयाबीन</p></div>
                 <div><p className="text-xs text-muted-foreground">{t('crops.water')}</p><p className="font-semibold text-foreground">{t('crops.borewell')}</p></div>
               </div>
             </GlassCard>
@@ -90,7 +90,7 @@ const Profile = () => {
               {diagnostics.length === 0 ? (
                 <GlassCard className="flex flex-col items-center justify-center py-8">
                   <FileText size={32} className="text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">कोई AI रिपोर्ट नहीं</p>
+                  <p className="text-sm text-muted-foreground">{t('community.no_reports')}</p>
                 </GlassCard>
               ) : (
                 diagnostics.map((d) => (

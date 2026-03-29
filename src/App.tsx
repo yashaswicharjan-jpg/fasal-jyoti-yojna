@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence, motion } from "framer-motion";
@@ -12,16 +12,26 @@ import Diagnose from "@/pages/Diagnose";
 import CropAdvisor from "@/pages/CropAdvisor";
 import Community from "@/pages/Community";
 import Profile from "@/pages/Profile";
+import Auth from "@/pages/Auth";
 import NotFound from "@/pages/NotFound";
 import { useEffect } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { useConnectivity } from "@/utils/connectivity";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 
 const queryClient = new QueryClient();
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="min-h-screen bg-background flex items-center justify-center"><span className="text-4xl animate-pulse">🌾</span></div>;
+  if (!user) return <Navigate to="/auth" replace />;
+  return <>{children}</>;
+};
 
 const AnimatedRoutes = () => {
   const location = useLocation();
   const { isSlowConnection } = useConnectivity();
+  const { user } = useAuth();
 
   return (
     <AnimatePresence mode="wait">
@@ -33,11 +43,12 @@ const AnimatedRoutes = () => {
         transition={{ duration: isSlowConnection ? 0 : 0.25 }}
       >
         <Routes location={location}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/diagnose" element={<Diagnose />} />
-          <Route path="/crops" element={<CropAdvisor />} />
-          <Route path="/community" element={<Community />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/auth" element={user ? <Navigate to="/" replace /> : <Auth />} />
+          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/diagnose" element={<ProtectedRoute><Diagnose /></ProtectedRoute>} />
+          <Route path="/crops" element={<ProtectedRoute><CropAdvisor /></ProtectedRoute>} />
+          <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
@@ -53,44 +64,45 @@ const ThemeInitializer = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Register service worker (only in production, not in iframe)
 const registerSW = () => {
   if (!('serviceWorker' in navigator)) return;
-
-  const isInIframe = (() => {
-    try { return window.self !== window.top; } catch { return true; }
-  })();
-  const isPreviewHost =
-    window.location.hostname.includes('id-preview--') ||
-    window.location.hostname.includes('lovableproject.com');
-
+  const isInIframe = (() => { try { return window.self !== window.top; } catch { return true; } })();
+  const isPreviewHost = window.location.hostname.includes('id-preview--') || window.location.hostname.includes('lovableproject.com');
   if (isPreviewHost || isInIframe) {
-    // Unregister any existing SW in preview
-    navigator.serviceWorker?.getRegistrations().then((regs) => {
-      regs.forEach((r) => r.unregister());
-    });
+    navigator.serviceWorker?.getRegistrations().then((regs) => { regs.forEach((r) => r.unregister()); });
     return;
   }
-
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  });
+  window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
 };
 
 registerSW();
+
+const AppContent = () => {
+  const { user } = useAuth();
+  const location = useLocation();
+  const isAuthPage = location.pathname === '/auth';
+
+  return (
+    <>
+      <OfflineBanner />
+      <AnimatedRoutes />
+      {user && !isAuthPage && <BottomNav />}
+      {user && !isAuthPage && <KisanDostChatbot />}
+      <InstallPrompt />
+    </>
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Sonner />
       <ThemeInitializer>
-        <BrowserRouter>
-          <OfflineBanner />
-          <AnimatedRoutes />
-          <BottomNav />
-          <KisanDostChatbot />
-          <InstallPrompt />
-        </BrowserRouter>
+        <AuthProvider>
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </AuthProvider>
       </ThemeInitializer>
     </TooltipProvider>
   </QueryClientProvider>

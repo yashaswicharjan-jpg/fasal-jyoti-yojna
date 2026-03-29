@@ -8,12 +8,16 @@ import SeedLoader from '@/components/SeedLoader';
 import SpeakButton from '@/components/SpeakButton';
 import { compressImage, formatBytes } from '@/utils/imageCompression';
 import { shareOnWhatsApp, formatDiseaseForWhatsApp } from '@/utils/sharing';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 type Mode = 'disease' | 'soil';
 type Tab = 'chemical' | 'organic' | 'prevention';
 
 const Diagnose = () => {
   const { t, i18n } = useTranslation();
+  const { user } = useAuth();
   const [mode, setMode] = useState<Mode>('disease');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -25,20 +29,13 @@ const Diagnose = () => {
   const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    setCompressionInfo(
-      i18n.language === 'hi' ? 'छवि अनुकूलित हो रही है...' : 'Optimizing image...'
-    );
-
+    setCompressionInfo(i18n.language === 'hi' ? 'छवि अनुकूलित हो रही है...' : 'Optimizing image...');
     try {
       const compressed = await compressImage(file);
       setImagePreview(compressed.dataUrl);
-      setCompressionInfo(
-        `${formatBytes(compressed.originalSize)} → ${formatBytes(compressed.compressedSize)}`
-      );
+      setCompressionInfo(`${formatBytes(compressed.originalSize)} → ${formatBytes(compressed.compressedSize)}`);
       setTimeout(() => setCompressionInfo(null), 3000);
     } catch {
-      // Fallback to raw preview
       const reader = new FileReader();
       reader.onload = () => setImagePreview(reader.result as string);
       reader.readAsDataURL(file);
@@ -50,31 +47,55 @@ const Diagnose = () => {
   const handleAnalyze = async () => {
     if (!imagePreview) return;
     setAnalyzing(true);
-    await new Promise((r) => setTimeout(r, 2500));
 
-    if (mode === 'disease') {
-      setResult({
-        DiseaseName: 'Late Blight',
-        DiseaseNameHindi: 'पछेती अंगमारी',
-        Severity: 'Medium',
-        Confidence: '85%',
-        ChemicalCure: 'Mancozeb 75% WP',
-        ChemicalDosage: '2.5 g/L water',
-        OrganicAlternative: 'Neem oil spray',
-        OrganicMethod: 'Mix 5ml neem oil per liter of water, spray on affected leaves early morning',
-        Prevention: ['Ensure proper spacing between plants', 'Avoid overhead irrigation', 'Remove and destroy infected plant parts'],
-        AffectedCrops: ['Tomato', 'Potato'],
-        ImmediateAction: 'Remove and destroy affected leaves immediately',
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-assistant', {
+        body: {
+          mode,
+          imageBase64: imagePreview,
+          language: i18n.language,
+          messages: [{ role: 'user', content: mode === 'disease' ? 'Analyze this plant for diseases' : 'Analyze this soil sample' }],
+        },
       });
-    } else {
-      setResult({
-        SoilType: 'Black Cotton Soil',
-        pH: '7.2 - 7.8',
-        Fertility: 'Medium',
-        RecommendedCrops: ['Cotton', 'Soybean', 'Sorghum'],
-        Deficiencies: ['Zinc', 'Iron'],
-        Amendments: 'Add Zinc Sulphate (25 kg/ha) and FeSO4 (50 kg/ha). Add organic manure.',
-      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setResult(data.result);
+
+      // Save to database
+      if (user && mode === 'disease' && data.result) {
+        await supabase.from('ai_diagnostics').insert({
+          user_id: user.id,
+          result_title: data.result.DiseaseName || 'Analysis',
+          detection_type: mode,
+          treatment_plan: data.result.ChemicalCure || '',
+          organic_options: data.result.OrganicAlternative || '',
+        });
+      }
+    } catch (err: any) {
+      console.error('AI analysis error:', err);
+      toast.error('AI analysis failed. Please try again.');
+      // Fallback mock data
+      if (mode === 'disease') {
+        setResult({
+          DiseaseName: 'Late Blight', DiseaseNameHindi: 'पछेती अंगमारी',
+          Severity: 'Medium', Confidence: '85%',
+          ChemicalCure: 'Mancozeb 75% WP', ChemicalDosage: '2.5 g/L water',
+          OrganicAlternative: 'Neem oil spray',
+          OrganicMethod: 'Mix 5ml neem oil per liter of water, spray on affected leaves early morning',
+          Prevention: ['Ensure proper spacing', 'Avoid overhead irrigation', 'Remove infected parts'],
+          AffectedCrops: ['Tomato', 'Potato'],
+          ImmediateAction: 'Remove and destroy affected leaves immediately',
+        });
+      } else {
+        setResult({
+          SoilType: 'Black Cotton Soil', pH: '7.2 - 7.8', Fertility: 'Medium',
+          RecommendedCrops: ['Cotton', 'Soybean', 'Sorghum'],
+          Deficiencies: ['Zinc', 'Iron'],
+          Amendments: 'Add Zinc Sulphate (25 kg/ha) and FeSO4 (50 kg/ha).',
+        });
+      }
     }
     setAnalyzing(false);
   };
@@ -97,22 +118,15 @@ const Diagnose = () => {
     <div className="min-h-screen bg-background pb-20">
       <TopBar title={t('diagnose.title')} />
       <main className="px-4 py-4 max-w-lg mx-auto space-y-4">
-        {/* Mode Toggle */}
         <div className="flex rounded-full bg-muted p-1">
           {(['disease', 'soil'] as Mode[]).map((m) => (
-            <button
-              key={m}
-              onClick={() => { setMode(m); setResult(null); }}
-              className={`flex-1 py-2.5 rounded-full text-sm font-medium transition-all min-h-[44px] ${
-                mode === m ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground'
-              }`}
-            >
+            <button key={m} onClick={() => { setMode(m); setResult(null); }}
+              className={`flex-1 py-2.5 rounded-full text-sm font-medium transition-all min-h-[44px] ${mode === m ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground'}`}>
               {m === 'disease' ? t('diagnose.leaf_disease') : t('diagnose.soil_analysis')}
             </button>
           ))}
         </div>
 
-        {/* Image Input */}
         <GlassCard className="flex flex-col items-center gap-4">
           {imagePreview ? (
             <div className="w-full aspect-square rounded-2xl overflow-hidden bg-muted">
@@ -124,40 +138,21 @@ const Diagnose = () => {
               <p className="text-sm text-muted-foreground text-center px-4">{t('diagnose.no_image')}</p>
             </div>
           )}
-
-          {compressionInfo && (
-            <p className="text-xs text-primary font-medium">📷 {compressionInfo}</p>
-          )}
-
+          {compressionInfo && <p className="text-xs text-primary font-medium">📷 {compressionInfo}</p>}
           <div className="flex gap-3 w-full">
-            <button
-              onClick={() => {
-                fileRef.current?.setAttribute('capture', 'environment');
-                fileRef.current?.click();
-              }}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-medium min-h-[48px] animate-pulse-scale"
-            >
-              <Camera size={20} />
-              <span className="text-sm">{t('diagnose.take_photo')}</span>
+            <button onClick={() => { fileRef.current?.setAttribute('capture', 'environment'); fileRef.current?.click(); }}
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-medium min-h-[48px] animate-pulse-scale">
+              <Camera size={20} /><span className="text-sm">{t('diagnose.take_photo')}</span>
             </button>
-            <button
-              onClick={() => {
-                fileRef.current?.removeAttribute('capture');
-                fileRef.current?.click();
-              }}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-muted text-foreground font-medium min-h-[48px]"
-            >
-              <Image size={20} />
-              <span className="text-sm">{t('diagnose.gallery')}</span>
+            <button onClick={() => { fileRef.current?.removeAttribute('capture'); fileRef.current?.click(); }}
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-muted text-foreground font-medium min-h-[48px]">
+              <Image size={20} /><span className="text-sm">{t('diagnose.gallery')}</span>
             </button>
           </div>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
-
           {imagePreview && !analyzing && !result && (
-            <button
-              onClick={handleAnalyze}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-secondary text-primary-foreground font-semibold min-h-[48px]"
-            >
+            <button onClick={handleAnalyze}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-secondary text-primary-foreground font-semibold min-h-[48px]">
               {t('diagnose.analyze')}
             </button>
           )}
@@ -165,22 +160,12 @@ const Diagnose = () => {
 
         {analyzing && <SeedLoader text={t('diagnose.analyzing')} />}
 
-        {/* Results */}
         <AnimatePresence>
           {result && !analyzing && (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              className="space-y-4"
-            >
-              {/* AI Transparency Label */}
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }} className="space-y-4">
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/50 border border-border/50">
                 <Bot size={14} className="text-muted-foreground" />
-                <span className="text-[10px] text-muted-foreground">
-                  🤖 AI द्वारा उत्पन्न — कृपया स्थानीय कृषि विशेषज्ञ से पुष्टि करें
-                </span>
+                <span className="text-[10px] text-muted-foreground">🤖 AI द्वारा उत्पन्न — कृपया स्थानीय कृषि विशेषज्ञ से पुष्टि करें</span>
               </div>
 
               {mode === 'disease' ? (
@@ -190,9 +175,7 @@ const Diagnose = () => {
                       <h3 className="text-lg font-bold text-foreground">{result.DiseaseName}</h3>
                       <div className="flex items-center gap-2">
                         <SpeakButton text={getResultSpeechText()} />
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${severityColor(result.Severity)}`}>
-                          {result.Severity}
-                        </span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${severityColor(result.Severity)}`}>{result.Severity}</span>
                       </div>
                     </div>
                     <p className="text-muted-foreground text-sm mb-1">{result.DiseaseNameHindi}</p>
@@ -206,15 +189,9 @@ const Diagnose = () => {
                       { key: 'organic' as Tab, icon: Leaf, label: t('diagnose.organic') },
                       { key: 'prevention' as Tab, icon: Shield, label: t('diagnose.prevention') },
                     ]).map((tab) => (
-                      <button
-                        key={tab.key}
-                        onClick={() => setActiveTab(tab.key)}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-medium transition-all min-h-[44px] ${
-                          activeTab === tab.key ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground'
-                        }`}
-                      >
-                        <tab.icon size={14} />
-                        {tab.label}
+                      <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-medium transition-all min-h-[44px] ${activeTab === tab.key ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground'}`}>
+                        <tab.icon size={14} />{tab.label}
                       </button>
                     ))}
                   </div>
@@ -234,60 +211,50 @@ const Diagnose = () => {
                     )}
                     {activeTab === 'prevention' && (
                       <ul className="space-y-2">
-                        {result.Prevention.map((p: string, i: number) => (
+                        {result.Prevention?.map((p: string, i: number) => (
                           <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                            <Shield size={14} className="mt-0.5 text-primary flex-shrink-0" />
-                            {p}
+                            <Shield size={14} className="mt-0.5 text-primary flex-shrink-0" />{p}
                           </li>
                         ))}
                       </ul>
                     )}
                   </GlassCard>
 
-                  {/* Action buttons */}
                   <div className="flex gap-3">
-                    <button
-                      onClick={() => shareOnWhatsApp(formatDiseaseForWhatsApp(result, i18n.language))}
-                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary/10 text-secondary font-medium min-h-[48px]"
-                    >
-                      <Share2 size={16} />
-                      WhatsApp पर भेजो
-                    </button>
-                    <button className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary/10 text-primary font-medium min-h-[48px]">
-                      {t('diagnose.save_history')}
+                    <button onClick={() => shareOnWhatsApp(formatDiseaseForWhatsApp(result, i18n.language))}
+                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary/10 text-secondary font-medium min-h-[48px]">
+                      <Share2 size={16} />WhatsApp पर भेजो
                     </button>
                   </div>
                 </>
               ) : (
-                <>
-                  <GlassCard className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-bold text-foreground">{result.SoilType}</h3>
-                      <SpeakButton text={getResultSpeechText()} />
+                <GlassCard className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-foreground">{result.SoilType}</h3>
+                    <SpeakButton text={getResultSpeechText()} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div><span className="text-muted-foreground">pH:</span> <span className="font-medium text-foreground">{result.pH}</span></div>
+                    <div><span className="text-muted-foreground">Fertility:</span> <span className="font-medium text-foreground">{result.Fertility}</span></div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground mb-1">Recommended Crops:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {result.RecommendedCrops?.map((c: string) => (
+                        <span key={c} className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">{c}</span>
+                      ))}
                     </div>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div><span className="text-muted-foreground">pH:</span> <span className="font-medium text-foreground">{result.pH}</span></div>
-                      <div><span className="text-muted-foreground">Fertility:</span> <span className="font-medium text-foreground">{result.Fertility}</span></div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground mb-1">Deficiencies:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {result.Deficiencies?.map((d: string) => (
+                        <span key={d} className="px-3 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-medium">{d}</span>
+                      ))}
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground mb-1">Recommended Crops:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {result.RecommendedCrops.map((c: string) => (
-                          <span key={c} className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">{c}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground mb-1">Deficiencies:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {result.Deficiencies.map((d: string) => (
-                          <span key={d} className="px-3 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-medium">{d}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{result.Amendments}</p>
-                  </GlassCard>
-                </>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{result.Amendments}</p>
+                </GlassCard>
               )}
             </motion.div>
           )}

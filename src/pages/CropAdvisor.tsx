@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Sparkles, Share2, Bot } from 'lucide-react';
 import TopBar from '@/components/TopBar';
 import GlassCard from '@/components/GlassCard';
 import SeedLoader from '@/components/SeedLoader';
+import SpeakButton from '@/components/SpeakButton';
+import { shareOnWhatsApp, formatCropForWhatsApp } from '@/utils/sharing';
 
 const soilTypes = [
   { key: 'clay', emoji: '🏔️' },

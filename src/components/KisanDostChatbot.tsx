@@ -141,7 +141,7 @@ const KisanDostChatbot = () => {
                   </div>
                 </motion.div>
               ))}
-              {isTyping && assistantContent === '' && (
+              {isTyping && messages[messages.length - 1]?.role !== 'assistant' && (
                 <div className="flex justify-start">
                   <div className="glass-card-solid px-4 py-3 rounded-2xl rounded-bl-md">
                     <div className="flex gap-1.5">

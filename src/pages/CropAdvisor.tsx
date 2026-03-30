@@ -9,6 +9,7 @@ import SpeakButton from '@/components/SpeakButton';
 import { shareOnWhatsApp, formatCropForWhatsApp } from '@/utils/sharing';
 import { supabase } from '@/integrations/supabase/client';
 import { useHistoryLogger } from '@/hooks/useHistoryLogger';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const soilTypes = [
@@ -37,6 +38,7 @@ const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 const CropAdvisor = () => {
   const { t, i18n } = useTranslation();
   const { logSearch } = useHistoryLogger();
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ soilType: '', state: '', month: '', landSize: '', waterSource: '' });
   const [loading, setLoading] = useState(false);
@@ -68,6 +70,18 @@ const CropAdvisor = () => {
         feature: 'crop_advisor',
         result_summary: r.map((c: any) => c.CropName).join(', '),
       });
+
+      // Save to ai_chat_history
+      if (user) {
+        try {
+          await supabase.from('ai_chat_history').insert({
+            user_id: user.id,
+            category: 'crop_advisor',
+            query: `Crop advice for ${form.soilType} soil in ${form.state}, ${form.month}`,
+            response: JSON.stringify(r),
+          });
+        } catch { /* non-critical */ }
+      }
     } catch (err) {
       console.error('Crop advisor error:', err);
       toast.error(t('crops.ai_failed'));

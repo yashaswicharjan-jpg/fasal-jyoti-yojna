@@ -13,6 +13,7 @@ import {
   Wind,
   RefreshCw,
   AlertTriangle,
+  Clock,
 } from 'lucide-react';
 import TopBar from '@/components/TopBar';
 import GlassCard from '@/components/GlassCard';
@@ -87,7 +88,7 @@ const Dashboard = () => {
     { icon: Sprout, label: t('dashboard.soil_analysis'), path: '/diagnose', color: 'text-earth' },
     { icon: Wheat, label: t('dashboard.my_crops'), path: '/crops', color: 'text-secondary' },
     { icon: Bug, label: t('dashboard.disease_check'), path: '/diagnose', color: 'text-destructive', pulse: true },
-    { icon: Users, label: t('dashboard.community'), path: '/community', color: 'text-accent' },
+    { icon: Clock, label: t('history.title'), path: '/history', color: 'text-primary' },
   ];
 
   const weatherStats = weather

@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Mic, Camera } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useHistoryLogger } from '@/hooks/useHistoryLogger';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Message {
   id: string;
@@ -17,6 +19,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant
 const KisanDostChatbot = () => {
   const { t, i18n } = useTranslation();
   const { logSearch } = useHistoryLogger();
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -101,6 +104,18 @@ const KisanDostChatbot = () => {
             if (content) upsertAssistant(assistantContent + content);
           } catch { /* partial json */ }
         }
+      }
+
+      // Save to ai_chat_history after streaming completes
+      if (user && assistantContent) {
+        try {
+          await supabase.from('ai_chat_history').insert({
+            user_id: user.id,
+            category: 'chat',
+            query: userMessage.substring(0, 500),
+            response: assistantContent.substring(0, 5000),
+          });
+        } catch { /* non-critical */ }
       }
     } catch (err) {
       console.error('Chat error:', err);

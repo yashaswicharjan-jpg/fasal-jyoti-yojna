@@ -5,7 +5,8 @@
     "diagnose": "जाँच",
     "crops": "फसलें",
     "community": "समुदाय",
-    "profile": "प्रोफ़ाइल"
+    "profile": "प्रोफ़ाइल",
+    "history": "इतिहास"
   },
   "auth": {
     "login": "लॉगिन",
@@ -150,5 +151,19 @@
     "confirm": "पुष्टि करें",
     "acres": "एकड़",
     "hectares": "हेक्टेयर"
+  },
+  "history": {
+    "title": "मेरा खेत इतिहास",
+    "detail_title": "AI सलाह विवरण",
+    "your_query": "आपका प्रश्न",
+    "ai_response": "AI उत्तर",
+    "view_details": "विवरण देखें",
+    "empty": "अभी कोई AI इतिहास नहीं। कोई भी AI फीचर उपयोग करें!",
+    "disease_detection": "रोग जाँच",
+    "soil_analysis": "मिट्टी विश्लेषण",
+    "crop_advisor": "फसल सलाहकार",
+    "chat": "किसान दोस्त चैट",
+    "irrigation": "सिंचाई",
+    "fertilizer": "उर्वरक"
   }
 }

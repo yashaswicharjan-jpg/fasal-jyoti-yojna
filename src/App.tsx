@@ -12,6 +12,7 @@ import Diagnose from "@/pages/Diagnose";
 import CropAdvisor from "@/pages/CropAdvisor";
 import Community from "@/pages/Community";
 import Profile from "@/pages/Profile";
+import FarmHistory from "@/pages/FarmHistory";
 import Auth from "@/pages/Auth";
 import NotFound from "@/pages/NotFound";
 import { useEffect } from "react";
@@ -49,6 +50,7 @@ const AnimatedRoutes = () => {
           <Route path="/crops" element={<ProtectedRoute><CropAdvisor /></ProtectedRoute>} />
           <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/history" element={<ProtectedRoute><FarmHistory /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>

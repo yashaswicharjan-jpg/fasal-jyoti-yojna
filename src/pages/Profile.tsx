@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { Sun, Moon, MapPin, Calendar, Edit, Tractor, History, FileText, Settings, LogOut, Globe, Bell, Ruler, FlaskConical } from 'lucide-react';
+import { Sun, Moon, MapPin, Calendar, Tractor, History, FileText, Settings, LogOut, Globe } from 'lucide-react';
 import TopBar from '@/components/TopBar';
 import GlassCard from '@/components/GlassCard';
 import { useAppStore } from '@/store/useAppStore';
@@ -10,6 +10,31 @@ import { supabase } from '@/integrations/supabase/client';
 
 type ProfileTab = 'farm' | 'history' | 'reports' | 'settings';
 
+const FEATURE_META: Record<string, { label: string; icon: string }> = {
+  disease_detection: { label: 'Disease Check', icon: '🦠' },
+  soil_analysis: { label: 'Soil Analysis', icon: '🌱' },
+  crop_advisor: { label: 'Crop Advisor', icon: '🌾' },
+  irrigation: { label: 'Irrigation', icon: '💧' },
+  fertilizer: { label: 'Fertilizer', icon: '🧪' },
+  mandi_price: { label: 'Mandi Price', icon: '💹' },
+  weather: { label: 'Weather', icon: '🌤️' },
+  govt_scheme: { label: 'Govt Scheme', icon: '🏛️' },
+  kisan_dost_chat: { label: 'Kisan Dost', icon: '🤖' },
+  yield_prediction: { label: 'Yield Prediction', icon: '📊' },
+};
+
+const formatRelativeTime = (dateStr: string): string => {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days === 1) return 'Yesterday';
+  return `${days} days ago`;
+};
+
 const Profile = () => {
   const { t, i18n } = useTranslation();
   const { isDark, toggleTheme, setLanguage } = useAppStore();
@@ -17,11 +42,15 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState<ProfileTab>('farm');
   const [profile, setProfile] = useState<any>(null);
   const [diagnostics, setDiagnostics] = useState<any[]>([]);
+  const [searchHistory, setSearchHistory] = useState<any[]>([]);
+  const [selectedDiag, setSelectedDiag] = useState<any>(null);
+  const [historyFilter, setHistoryFilter] = useState('all');
 
   useEffect(() => {
     if (!user) return;
     supabase.from('profiles').select('*').eq('id', user.id).single().then(({ data }) => setProfile(data));
-    supabase.from('ai_diagnostics').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10).then(({ data }) => setDiagnostics(data || []));
+    supabase.from('ai_diagnostics').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50).then(({ data }) => setDiagnostics(data || []));
+    supabase.from('search_history').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(100).then(({ data }) => setSearchHistory(data || []));
   }, [user]);
 
   const tabs = [
@@ -32,6 +61,23 @@ const Profile = () => {
   ];
 
   const handleLangChange = (lang: string) => { i18n.changeLanguage(lang); setLanguage(lang); };
+
+  const deleteHistoryEntry = async (id: string) => {
+    await supabase.from('search_history').delete().eq('id', id);
+    setSearchHistory(prev => prev.filter(h => h.id !== id));
+  };
+
+  const clearAllHistory = async () => {
+    if (!user) return;
+    await supabase.from('search_history').delete().eq('user_id', user.id);
+    setSearchHistory([]);
+  };
+
+  const filteredHistory = historyFilter === 'all'
+    ? searchHistory
+    : searchHistory.filter(h => h.feature === historyFilter);
+
+  const uniqueFeatures = [...new Set(searchHistory.map(h => h.feature).filter(Boolean))];
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -61,7 +107,7 @@ const Profile = () => {
 
         <div className="flex gap-1 overflow-x-auto rounded-xl bg-muted p-1 scrollbar-hide">
           {tabs.map((tab) => (
-            <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+            <button key={tab.key} onClick={() => { setActiveTab(tab.key); setSelectedDiag(null); }}
               className={`flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-medium whitespace-nowrap min-h-[40px] transition-all ${activeTab === tab.key ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}>
               <tab.icon size={14} />{tab.label}
             </button>
@@ -72,37 +118,125 @@ const Profile = () => {
           {activeTab === 'farm' && (
             <GlassCard className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-              <div><p className="text-xs text-muted-foreground">{t('profile.land')}</p><p className="font-semibold text-foreground">5 {t('common.acres')}</p></div>
+                <div><p className="text-xs text-muted-foreground">{t('profile.land')}</p><p className="font-semibold text-foreground">5 {t('common.acres')}</p></div>
                 <div><p className="text-xs text-muted-foreground">{t('crops.soil_type')}</p><p className="font-semibold text-foreground">{t('crops.black')}</p></div>
                 <div><p className="text-xs text-muted-foreground">{t('profile.main_crop')}</p><p className="font-semibold text-foreground">सोयाबीन</p></div>
                 <div><p className="text-xs text-muted-foreground">{t('crops.water')}</p><p className="font-semibold text-foreground">{t('crops.borewell')}</p></div>
               </div>
             </GlassCard>
           )}
+
           {activeTab === 'history' && (
-            <GlassCard className="flex flex-col items-center justify-center py-8">
-              <History size={32} className="text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">{t('dashboard.no_activity')}</p>
-            </GlassCard>
-          )}
-          {activeTab === 'reports' && (
             <div className="space-y-3">
-              {diagnostics.length === 0 ? (
+              {searchHistory.length === 0 ? (
                 <GlassCard className="flex flex-col items-center justify-center py-8">
-                  <FileText size={32} className="text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">{t('community.no_reports')}</p>
+                  <span className="text-4xl mb-2">🔍</span>
+                  <p className="text-sm text-muted-foreground text-center">{t('dashboard.no_activity')}</p>
                 </GlassCard>
               ) : (
-                diagnostics.map((d) => (
-                  <GlassCard key={d.id} className="space-y-1">
-                    <p className="font-semibold text-foreground text-sm">{d.result_title}</p>
-                    <p className="text-xs text-muted-foreground">{d.detection_type} · {new Date(d.created_at).toLocaleDateString()}</p>
-                    {d.treatment_plan && <p className="text-xs text-foreground">💊 {d.treatment_plan}</p>}
-                  </GlassCard>
-                ))
+                <>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">{filteredHistory.length} entries</span>
+                    <button onClick={clearAllHistory} className="text-xs text-destructive font-medium px-2 py-1">{t('profile.clear_all') || 'Clear all'}</button>
+                  </div>
+
+                  <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+                    {['all', ...uniqueFeatures].map(f => (
+                      <button key={f} onClick={() => setHistoryFilter(f)}
+                        className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${historyFilter === f ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                        {f === 'all' ? 'All' : `${FEATURE_META[f]?.icon || '🔍'} ${FEATURE_META[f]?.label || f}`}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="space-y-2">
+                    {filteredHistory.map(entry => {
+                      const meta = FEATURE_META[entry.feature] || { label: entry.feature, icon: '🔍' };
+                      return (
+                        <GlassCard key={entry.id} className="flex items-start gap-3 py-3">
+                          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-base flex-shrink-0">
+                            {meta.icon}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] font-medium text-primary">{meta.label}</p>
+                            <p className="text-sm text-foreground truncate">{entry.query}</p>
+                            {entry.result_summary && (
+                              <p className="text-xs text-muted-foreground truncate mt-0.5">→ {entry.result_summary}</p>
+                            )}
+                          </div>
+                          <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                            <span className="text-[10px] text-muted-foreground">{entry.created_at && formatRelativeTime(entry.created_at)}</span>
+                            <button onClick={() => deleteHistoryEntry(entry.id)} className="text-muted-foreground hover:text-destructive text-xs">✕</button>
+                          </div>
+                        </GlassCard>
+                      );
+                    })}
+                  </div>
+                </>
               )}
             </div>
           )}
+
+          {activeTab === 'reports' && (
+            <div className="space-y-3">
+              {selectedDiag ? (
+                <div className="space-y-3">
+                  <button onClick={() => setSelectedDiag(null)} className="text-sm text-muted-foreground flex items-center gap-1">← Back</button>
+                  {selectedDiag.image_url && (
+                    <img src={selectedDiag.image_url} alt="Analyzed" className="w-full rounded-xl max-h-48 object-cover" />
+                  )}
+                  <GlassCard className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{selectedDiag.detection_type === 'disease' ? '🦠' : '🌱'}</span>
+                      <div>
+                        <p className="font-semibold text-foreground">{selectedDiag.result_title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {selectedDiag.detection_type === 'disease' ? 'Disease Detection' : 'Soil Analysis'} · {selectedDiag.created_at && formatRelativeTime(selectedDiag.created_at)}
+                        </p>
+                      </div>
+                    </div>
+                  </GlassCard>
+                  {selectedDiag.treatment_plan && (
+                    <GlassCard className="space-y-1 border-l-4 border-blue-400">
+                      <p className="text-xs font-medium text-primary">🧪 Chemical Treatment</p>
+                      <p className="text-sm text-foreground">{selectedDiag.treatment_plan}</p>
+                    </GlassCard>
+                  )}
+                  {selectedDiag.organic_options && (
+                    <GlassCard className="space-y-1 border-l-4 border-green-400">
+                      <p className="text-xs font-medium text-secondary">🌿 Organic Alternative</p>
+                      <p className="text-sm text-foreground">{selectedDiag.organic_options}</p>
+                    </GlassCard>
+                  )}
+                </div>
+              ) : diagnostics.length === 0 ? (
+                <GlassCard className="flex flex-col items-center justify-center py-8">
+                  <span className="text-4xl mb-2">🔬</span>
+                  <p className="text-sm text-muted-foreground text-center">{t('community.no_reports')}</p>
+                </GlassCard>
+              ) : (
+                <>
+                  <p className="text-xs text-muted-foreground">{diagnostics.length} AI reports saved</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {diagnostics.map((d) => (
+                      <GlassCard key={d.id} onClick={() => setSelectedDiag(d)} className="cursor-pointer space-y-2">
+                        {d.image_url ? (
+                          <img src={d.image_url} alt={d.result_title} className="w-full h-20 object-cover rounded-lg" />
+                        ) : (
+                          <div className="w-full h-20 rounded-lg bg-primary/5 flex items-center justify-center text-2xl">
+                            {d.detection_type === 'disease' ? '🦠' : '🌱'}
+                          </div>
+                        )}
+                        <p className="text-xs font-medium text-foreground truncate">{d.result_title ?? 'Unknown'}</p>
+                        <p className="text-[10px] text-muted-foreground">{d.created_at && formatRelativeTime(d.created_at)}</p>
+                      </GlassCard>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
           {activeTab === 'settings' && (
             <div className="space-y-3">
               <GlassCard className="space-y-4">

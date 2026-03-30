@@ -61,6 +61,13 @@ const CropAdvisor = () => {
       if (data?.error) throw new Error(data.error);
       const r = Array.isArray(data.result) ? data.result : [data.result];
       setResults(r);
+
+      // Log search history
+      await logSearch({
+        query: `Soil: ${form.soilType}, Region: ${form.state}, Month: ${form.month}`,
+        feature: 'crop_advisor',
+        result_summary: r.map((c: any) => c.CropName).join(', '),
+      });
     } catch (err) {
       console.error('Crop advisor error:', err);
       toast.error(t('crops.ai_failed'));

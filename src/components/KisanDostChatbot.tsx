@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Mic, Camera } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useHistoryLogger } from '@/hooks/useHistoryLogger';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Message {
   id: string;

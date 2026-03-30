@@ -138,7 +138,7 @@ const FarmHistory = () => {
               <div key={date}>
                 <p className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wider">{date}</p>
                 <div className="relative pl-6 border-l-2 border-primary/20 space-y-3">
-                  {items.map((item: any, idx: number) => {
+                  {(items as any[]).map((item: any, idx: number) => {
                     const meta = CATEGORY_META[item.category] || CATEGORY_META.chat;
                     const Icon = meta.icon;
                     return (

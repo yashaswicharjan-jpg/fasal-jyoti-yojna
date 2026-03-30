@@ -12,6 +12,7 @@ import Diagnose from "@/pages/Diagnose";
 import CropAdvisor from "@/pages/CropAdvisor";
 import Community from "@/pages/Community";
 import Profile from "@/pages/Profile";
+import FarmHistory from "@/pages/FarmHistory";
 import Auth from "@/pages/Auth";
 import NotFound from "@/pages/NotFound";
 import { useEffect } from "react";

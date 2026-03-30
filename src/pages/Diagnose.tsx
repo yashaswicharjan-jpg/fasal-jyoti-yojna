@@ -78,6 +78,16 @@ const Diagnose = () => {
           feature: mode === 'disease' ? 'disease_detection' : 'soil_analysis',
           result_summary: mode === 'disease' ? data.result.DiseaseName : data.result.SoilType,
         });
+
+        // Also save to ai_chat_history
+        try {
+          await supabase.from('ai_chat_history').insert({
+            user_id: user.id,
+            category: mode === 'disease' ? 'disease_detection' : 'soil_analysis',
+            query: mode === 'disease' ? 'Plant disease image analysis' : 'Soil sample image analysis',
+            response: JSON.stringify(data.result),
+          });
+        } catch { /* non-critical */ }
       }
     } catch (err: any) {
       console.error('AI analysis error:', err);

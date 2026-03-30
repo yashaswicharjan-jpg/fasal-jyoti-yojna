@@ -36,11 +36,18 @@ const KisanDostChatbot = () => {
 
   const handleSend = async () => {
     if (!input.trim() || isTyping) return;
-    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: input, timestamp: new Date() };
+    const userMessage = input.trim();
+    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: userMessage, timestamp: new Date() };
     const updatedMessages = [...messages, userMsg];
     setMessages(updatedMessages);
     setInput('');
     setIsTyping(true);
+
+    // Log chat search history (non-blocking)
+    logSearch({
+      query: userMessage.substring(0, 200),
+      feature: 'kisan_dost_chat',
+    });
 
     let assistantContent = '';
 

@@ -65,13 +65,17 @@ const Diagnose = () => {
       setResult(data.result);
 
       // Save to database
-      if (user && mode === 'disease' && data.result) {
-        await supabase.from('ai_diagnostics').insert({
-          user_id: user.id,
-          result_title: data.result.DiseaseName || 'Analysis',
+      if (user && data.result) {
+        await logAIDiagnostic({
           detection_type: mode,
-          treatment_plan: data.result.ChemicalCure || '',
+          result_title: mode === 'disease' ? (data.result.DiseaseName || 'Analysis') : (data.result.SoilType || 'Soil Analysis'),
+          treatment_plan: data.result.ChemicalCure || data.result.Amendments || '',
           organic_options: data.result.OrganicAlternative || '',
+        });
+        await logSearch({
+          query: mode === 'disease' ? 'Disease image analysis' : 'Soil image analysis',
+          feature: mode === 'disease' ? 'disease_detection' : 'soil_analysis',
+          result_summary: mode === 'disease' ? data.result.DiseaseName : data.result.SoilType,
         });
       }
     } catch (err: any) {

@@ -69,6 +69,18 @@ const CropAdvisor = () => {
         feature: 'crop_advisor',
         result_summary: r.map((c: any) => c.CropName).join(', '),
       });
+
+      // Save to ai_chat_history
+      if (user) {
+        try {
+          await supabase.from('ai_chat_history').insert({
+            user_id: user.id,
+            category: 'crop_advisor',
+            query: `Crop advice for ${form.soilType} soil in ${form.state}, ${form.month}`,
+            response: JSON.stringify(r),
+          });
+        } catch { /* non-critical */ }
+      }
     } catch (err) {
       console.error('Crop advisor error:', err);
       toast.error(t('crops.ai_failed'));

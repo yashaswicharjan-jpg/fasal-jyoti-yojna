@@ -5,7 +5,8 @@
     "diagnose": "Diagnose",
     "crops": "Crops",
     "community": "Community",
-    "profile": "Profile"
+    "profile": "Profile",
+    "history": "History"
   },
   "auth": {
     "login": "Login",

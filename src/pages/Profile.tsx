@@ -203,7 +203,7 @@ const Profile = () => {
                     </GlassCard>
                   )}
                   {selectedDiag.organic_options && (
-                    <GlassCard className="space-y-1 border-l-4 border-green-400">
+                    <GlassCard className="space-y-1 border-l-4 border-secondary/40">
                       <p className="text-xs font-medium text-secondary">🌿 Organic Alternative</p>
                       <p className="text-sm text-foreground">{selectedDiag.organic_options}</p>
                     </GlassCard>

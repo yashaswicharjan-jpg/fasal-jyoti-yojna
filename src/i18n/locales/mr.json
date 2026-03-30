@@ -151,5 +151,19 @@
     "confirm": "पुष्टी करा",
     "acres": "एकर",
     "hectares": "हेक्टर"
+  },
+  "history": {
+    "title": "माझा शेत इतिहास",
+    "detail_title": "AI सल्ला तपशील",
+    "your_query": "तुमचा प्रश्न",
+    "ai_response": "AI उत्तर",
+    "view_details": "तपशील पहा",
+    "empty": "अजून कोणताही AI इतिहास नाही. कोणतेही AI वैशिष्ट्य वापरा!",
+    "disease_detection": "रोग तपासणी",
+    "soil_analysis": "माती विश्लेषण",
+    "crop_advisor": "पीक सल्लागार",
+    "chat": "किसान मित्र चॅट",
+    "irrigation": "सिंचन",
+    "fertilizer": "खत"
   }
 }

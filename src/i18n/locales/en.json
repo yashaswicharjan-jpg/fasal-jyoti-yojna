@@ -151,5 +151,19 @@
     "confirm": "Confirm",
     "acres": "acres",
     "hectares": "hectares"
+  },
+  "history": {
+    "title": "My Farm History",
+    "detail_title": "AI Advice Detail",
+    "your_query": "Your Query",
+    "ai_response": "AI Response",
+    "view_details": "View Details",
+    "empty": "No AI history yet. Use any AI feature and it will appear here!",
+    "disease_detection": "Disease Detection",
+    "soil_analysis": "Soil Analysis",
+    "crop_advisor": "Crop Advisor",
+    "chat": "Kisan Dost Chat",
+    "irrigation": "Irrigation",
+    "fertilizer": "Fertilizer"
   }
 }

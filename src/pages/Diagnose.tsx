@@ -10,6 +10,7 @@ import { compressImage, formatBytes } from '@/utils/imageCompression';
 import { shareOnWhatsApp, formatDiseaseForWhatsApp } from '@/utils/sharing';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useHistoryLogger } from '@/hooks/useHistoryLogger';
 import { toast } from 'sonner';
 
 type Mode = 'disease' | 'soil';

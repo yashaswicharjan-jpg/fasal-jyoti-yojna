@@ -37,6 +37,7 @@ const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 const CropAdvisor = () => {
   const { t, i18n } = useTranslation();
   const { logSearch } = useHistoryLogger();
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ soilType: '', state: '', month: '', landSize: '', waterSource: '' });
   const [loading, setLoading] = useState(false);

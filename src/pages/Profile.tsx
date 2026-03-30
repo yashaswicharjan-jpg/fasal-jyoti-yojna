@@ -197,7 +197,7 @@ const Profile = () => {
                     </div>
                   </GlassCard>
                   {selectedDiag.treatment_plan && (
-                    <GlassCard className="space-y-1 border-l-4 border-blue-400">
+                    <GlassCard className="space-y-1 border-l-4 border-primary/40">
                       <p className="text-xs font-medium text-primary">🧪 Chemical Treatment</p>
                       <p className="text-sm text-foreground">{selectedDiag.treatment_plan}</p>
                     </GlassCard>

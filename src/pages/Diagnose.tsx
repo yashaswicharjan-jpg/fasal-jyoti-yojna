@@ -19,6 +19,7 @@ type Tab = 'chemical' | 'organic' | 'prevention';
 const Diagnose = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const { logSearch, logAIDiagnostic } = useHistoryLogger();
   const [mode, setMode] = useState<Mode>('disease');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);

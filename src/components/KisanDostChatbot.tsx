@@ -105,6 +105,16 @@ const KisanDostChatbot = () => {
           } catch { /* partial json */ }
         }
       }
+
+      // Save to ai_chat_history after streaming completes
+      if (user && assistantContent) {
+        supabase.from('ai_chat_history').insert({
+          user_id: user.id,
+          category: 'chat',
+          query: userMessage.substring(0, 500),
+          response: assistantContent.substring(0, 5000),
+        }).then(() => {}).catch(() => {});
+      }
     } catch (err) {
       console.error('Chat error:', err);
       setMessages((prev) => [

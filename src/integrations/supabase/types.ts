@@ -215,6 +215,7 @@ export type Database = {
           feature: string | null
           id: string
           query: string | null
+          result_summary: string | null
           user_id: string
         }
         Insert: {
@@ -222,6 +223,7 @@ export type Database = {
           feature?: string | null
           id?: string
           query?: string | null
+          result_summary?: string | null
           user_id: string
         }
         Update: {
@@ -229,6 +231,7 @@ export type Database = {
           feature?: string | null
           id?: string
           query?: string | null
+          result_summary?: string | null
           user_id?: string
         }
         Relationships: [

@@ -8,6 +8,7 @@ import SeedLoader from '@/components/SeedLoader';
 import SpeakButton from '@/components/SpeakButton';
 import { shareOnWhatsApp, formatCropForWhatsApp } from '@/utils/sharing';
 import { supabase } from '@/integrations/supabase/client';
+import { useHistoryLogger } from '@/hooks/useHistoryLogger';
 import { toast } from 'sonner';
 
 const soilTypes = [
@@ -35,6 +36,7 @@ const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 
 const CropAdvisor = () => {
   const { t, i18n } = useTranslation();
+  const { logSearch } = useHistoryLogger();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ soilType: '', state: '', month: '', landSize: '', waterSource: '' });
   const [loading, setLoading] = useState(false);
@@ -59,6 +61,13 @@ const CropAdvisor = () => {
       if (data?.error) throw new Error(data.error);
       const r = Array.isArray(data.result) ? data.result : [data.result];
       setResults(r);
+
+      // Log search history
+      await logSearch({
+        query: `Soil: ${form.soilType}, Region: ${form.state}, Month: ${form.month}`,
+        feature: 'crop_advisor',
+        result_summary: r.map((c: any) => c.CropName).join(', '),
+      });
     } catch (err) {
       console.error('Crop advisor error:', err);
       toast.error(t('crops.ai_failed'));

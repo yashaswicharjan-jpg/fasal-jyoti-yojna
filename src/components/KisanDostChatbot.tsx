@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Mic, Camera } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { useHistoryLogger } from '@/hooks/useHistoryLogger';
 
 interface Message {
   id: string;
@@ -15,6 +16,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant
 
 const KisanDostChatbot = () => {
   const { t, i18n } = useTranslation();
+  const { logSearch } = useHistoryLogger();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -34,11 +36,18 @@ const KisanDostChatbot = () => {
 
   const handleSend = async () => {
     if (!input.trim() || isTyping) return;
-    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: input, timestamp: new Date() };
+    const userMessage = input.trim();
+    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: userMessage, timestamp: new Date() };
     const updatedMessages = [...messages, userMsg];
     setMessages(updatedMessages);
     setInput('');
     setIsTyping(true);
+
+    // Log chat search history (non-blocking)
+    logSearch({
+      query: userMessage.substring(0, 200),
+      feature: 'kisan_dost_chat',
+    });
 
     let assistantContent = '';
 

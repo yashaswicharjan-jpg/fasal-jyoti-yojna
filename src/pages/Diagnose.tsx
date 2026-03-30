@@ -10,6 +10,7 @@ import { compressImage, formatBytes } from '@/utils/imageCompression';
 import { shareOnWhatsApp, formatDiseaseForWhatsApp } from '@/utils/sharing';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useHistoryLogger } from '@/hooks/useHistoryLogger';
 import { toast } from 'sonner';
 
 type Mode = 'disease' | 'soil';
@@ -18,6 +19,7 @@ type Tab = 'chemical' | 'organic' | 'prevention';
 const Diagnose = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const { logSearch, logAIDiagnostic } = useHistoryLogger();
   const [mode, setMode] = useState<Mode>('disease');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -64,13 +66,17 @@ const Diagnose = () => {
       setResult(data.result);
 
       // Save to database
-      if (user && mode === 'disease' && data.result) {
-        await supabase.from('ai_diagnostics').insert({
-          user_id: user.id,
-          result_title: data.result.DiseaseName || 'Analysis',
+      if (user && data.result) {
+        await logAIDiagnostic({
           detection_type: mode,
-          treatment_plan: data.result.ChemicalCure || '',
+          result_title: mode === 'disease' ? (data.result.DiseaseName || 'Analysis') : (data.result.SoilType || 'Soil Analysis'),
+          treatment_plan: data.result.ChemicalCure || data.result.Amendments || '',
           organic_options: data.result.OrganicAlternative || '',
+        });
+        await logSearch({
+          query: mode === 'disease' ? 'Disease image analysis' : 'Soil image analysis',
+          feature: mode === 'disease' ? 'disease_detection' : 'soil_analysis',
+          result_summary: mode === 'disease' ? data.result.DiseaseName : data.result.SoilType,
         });
       }
     } catch (err: any) {

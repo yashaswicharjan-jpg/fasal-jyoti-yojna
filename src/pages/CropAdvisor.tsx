@@ -9,6 +9,7 @@ import SpeakButton from '@/components/SpeakButton';
 import { shareOnWhatsApp, formatCropForWhatsApp } from '@/utils/sharing';
 import { supabase } from '@/integrations/supabase/client';
 import { useHistoryLogger } from '@/hooks/useHistoryLogger';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const soilTypes = [

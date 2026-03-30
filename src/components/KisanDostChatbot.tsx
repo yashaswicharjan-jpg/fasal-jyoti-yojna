@@ -16,6 +16,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant
 
 const KisanDostChatbot = () => {
   const { t, i18n } = useTranslation();
+  const { logSearch } = useHistoryLogger();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {

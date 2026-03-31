@@ -105,11 +105,15 @@
     "upvote": "Upvote",
     "comment": "Comment",
     "share": "Share",
-    "write_post": "What's on your mind?",
+    "write_post": "Share your farming experience, success story, or ask a question...",
     "post": "Post",
     "no_posts": "No posts yet. Be the first to share!",
     "farmer": "Farmer",
-    "no_reports": "No AI reports yet"
+    "no_reports": "No AI reports yet",
+    "photo": "Photo",
+    "gallery": "Gallery",
+    "upload_failed": "Image upload failed",
+    "add_comment": "Write a comment..."
   },
   "profile": {
     "title": "Profile",
@@ -139,7 +143,8 @@
     "voice": "Voice",
     "camera": "Camera",
     "upload": "Upload",
-    "error": "Sorry, something went wrong. Please try again. 🙏"
+    "error": "Sorry, something went wrong. Please try again. 🙏",
+    "listening": "🎤 Listening... Speak now"
   },
   "common": {
     "loading": "Loading...",
@@ -165,5 +170,29 @@
     "chat": "Kisan Dost Chat",
     "irrigation": "Irrigation",
     "fertilizer": "Fertilizer"
+  },
+  "sidebar": {
+    "govt_schemes": "Govt Schemes",
+    "my_applications": "My Applications",
+    "search_schemes": "Search schemes...",
+    "ongoing": "Ongoing",
+    "expired": "Expired",
+    "variable": "Variable",
+    "deadline_soon": "schemes deadline within 15 days!",
+    "no_schemes": "No schemes found",
+    "benefit": "Benefit",
+    "documents": "Required Documents",
+    "how_to_apply": "How to Apply",
+    "apply_online": "Apply Online",
+    "helpline": "Helpline",
+    "start_tracking": "Start Tracking",
+    "already_tracking": "Already tracking this scheme",
+    "tracking_started": "Scheme added to My Applications!",
+    "total": "Total",
+    "approved": "Approved",
+    "pending": "Pending",
+    "applied_on": "Applied on",
+    "status_updated": "Status updated!",
+    "no_applications": "No applications yet. Browse schemes to start tracking!"
   }
 }

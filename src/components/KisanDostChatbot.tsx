@@ -1,11 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Mic, Camera } from 'lucide-react';
+import { X, Send, Mic, MicOff } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useHistoryLogger } from '@/hooks/useHistoryLogger';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { startVoiceRecognition } from '@/utils/voice';
+import { useAppStore } from '@/store/useAppStore';
 
 interface Message {
   id: string;
@@ -20,6 +22,7 @@ const KisanDostChatbot = () => {
   const { t, i18n } = useTranslation();
   const { logSearch } = useHistoryLogger();
   const { user } = useAuth();
+  const { language } = useAppStore();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -31,11 +34,61 @@ const KisanDostChatbot = () => {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const stopRecognitionRef = useRef<(() => void) | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
+
+  const handleVoiceInput = useCallback(() => {
+    if (isListening) {
+      stopRecognitionRef.current?.();
+      setIsListening(false);
+      return;
+    }
+
+    setIsListening(true);
+
+    const stop = startVoiceRecognition(
+      language || i18n.language,
+      (text) => {
+        setInput(text);
+        setIsListening(false);
+        // Auto-send after voice input
+        setTimeout(() => {
+          const fakeEvent = { key: 'Enter' } as React.KeyboardEvent;
+          // We'll trigger send directly
+        }, 100);
+      },
+      () => setIsListening(false)
+    );
+
+    if (!stop) {
+      setIsListening(false);
+      return;
+    }
+    stopRecognitionRef.current = stop;
+
+    // Auto-stop after 10 seconds
+    setTimeout(() => {
+      if (stopRecognitionRef.current) {
+        stopRecognitionRef.current();
+        setIsListening(false);
+      }
+    }, 10000);
+  }, [isListening, language, i18n.language]);
+
+  // Auto-send when input is set via voice
+  const prevInputRef = useRef('');
+  useEffect(() => {
+    if (input && input !== prevInputRef.current && !isListening && prevInputRef.current === '') {
+      // Voice input just completed, auto-send
+      setTimeout(() => handleSend(), 200);
+    }
+    prevInputRef.current = input;
+  }, [input, isListening]);
 
   const handleSend = async () => {
     if (!input.trim() || isTyping) return;
@@ -46,7 +99,6 @@ const KisanDostChatbot = () => {
     setInput('');
     setIsTyping(true);
 
-    // Log chat search history (non-blocking)
     logSearch({
       query: userMessage.substring(0, 200),
       feature: 'kisan_dost_chat',
@@ -106,7 +158,6 @@ const KisanDostChatbot = () => {
         }
       }
 
-      // Save to ai_chat_history after streaming completes
       if (user && assistantContent) {
         try {
           await supabase.from('ai_chat_history').insert({
@@ -180,15 +231,32 @@ const KisanDostChatbot = () => {
             </div>
             <div className="p-4 border-t border-border safe-area-bottom">
               <div className="flex items-center gap-2">
+                {/* Voice button */}
+                <button
+                  onClick={handleVoiceInput}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                    isListening
+                      ? 'bg-destructive text-destructive-foreground animate-pulse'
+                      : 'bg-muted text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+                </button>
                 <input value={input} onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                  placeholder={t('chatbot.placeholder')}
+                  placeholder={isListening ? (t('chatbot.listening') || '🎤 Listening...') : t('chatbot.placeholder')}
                   className="flex-1 px-4 py-2.5 rounded-full bg-muted text-foreground text-sm border border-border min-h-[44px]" />
                 <button onClick={handleSend} disabled={!input.trim() || isTyping}
                   className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-40">
                   <Send size={18} />
                 </button>
               </div>
+              {isListening && (
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  className="text-xs text-center text-destructive mt-2 font-medium">
+                  🎤 {t('chatbot.listening') || 'Listening... Speak now'}
+                </motion.p>
+              )}
             </div>
           </motion.div>
         )}

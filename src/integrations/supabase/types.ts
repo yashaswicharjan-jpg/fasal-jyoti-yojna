@@ -211,6 +211,99 @@ export type Database = {
           },
         ]
       }
+      govt_schemes: {
+        Row: {
+          application_deadline: string | null
+          application_form_url: string | null
+          application_method: string | null
+          application_portal_url: string | null
+          application_start_date: string | null
+          benefit_description: string | null
+          benefit_description_hindi: string | null
+          benefit_description_marathi: string | null
+          created_at: string | null
+          eligibility_criteria: Json | null
+          eligible_states: string[] | null
+          helpline_number: string | null
+          icon_emoji: string | null
+          id: string
+          is_active: boolean | null
+          is_recurring: boolean | null
+          max_benefit_amount: number | null
+          ministry: string
+          recurrence_pattern: string | null
+          required_documents: string[] | null
+          scheme_code: string
+          scheme_name: string
+          scheme_name_hindi: string
+          scheme_name_marathi: string
+          scheme_type: string | null
+          tags: string[] | null
+          target_beneficiary: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          application_deadline?: string | null
+          application_form_url?: string | null
+          application_method?: string | null
+          application_portal_url?: string | null
+          application_start_date?: string | null
+          benefit_description?: string | null
+          benefit_description_hindi?: string | null
+          benefit_description_marathi?: string | null
+          created_at?: string | null
+          eligibility_criteria?: Json | null
+          eligible_states?: string[] | null
+          helpline_number?: string | null
+          icon_emoji?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_recurring?: boolean | null
+          max_benefit_amount?: number | null
+          ministry: string
+          recurrence_pattern?: string | null
+          required_documents?: string[] | null
+          scheme_code: string
+          scheme_name: string
+          scheme_name_hindi: string
+          scheme_name_marathi: string
+          scheme_type?: string | null
+          tags?: string[] | null
+          target_beneficiary?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          application_deadline?: string | null
+          application_form_url?: string | null
+          application_method?: string | null
+          application_portal_url?: string | null
+          application_start_date?: string | null
+          benefit_description?: string | null
+          benefit_description_hindi?: string | null
+          benefit_description_marathi?: string | null
+          created_at?: string | null
+          eligibility_criteria?: Json | null
+          eligible_states?: string[] | null
+          helpline_number?: string | null
+          icon_emoji?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_recurring?: boolean | null
+          max_benefit_amount?: number | null
+          ministry?: string
+          recurrence_pattern?: string | null
+          required_documents?: string[] | null
+          scheme_code?: string
+          scheme_name?: string
+          scheme_name_hindi?: string
+          scheme_name_marathi?: string
+          scheme_type?: string | null
+          tags?: string[] | null
+          target_beneficiary?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -246,6 +339,84 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      scheme_applications: {
+        Row: {
+          application_date: string | null
+          application_reference_number: string | null
+          approved_at: string | null
+          benefit_amount_received: number | null
+          created_at: string | null
+          disbursed_at: string | null
+          documents_uploaded: string[] | null
+          id: string
+          next_action: string | null
+          next_action_due_date: string | null
+          notes: string | null
+          rejection_reason: string | null
+          reminder_enabled: boolean | null
+          scheme_id: string
+          status: string | null
+          submitted_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          application_date?: string | null
+          application_reference_number?: string | null
+          approved_at?: string | null
+          benefit_amount_received?: number | null
+          created_at?: string | null
+          disbursed_at?: string | null
+          documents_uploaded?: string[] | null
+          id?: string
+          next_action?: string | null
+          next_action_due_date?: string | null
+          notes?: string | null
+          rejection_reason?: string | null
+          reminder_enabled?: boolean | null
+          scheme_id: string
+          status?: string | null
+          submitted_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          application_date?: string | null
+          application_reference_number?: string | null
+          approved_at?: string | null
+          benefit_amount_received?: number | null
+          created_at?: string | null
+          disbursed_at?: string | null
+          documents_uploaded?: string[] | null
+          id?: string
+          next_action?: string | null
+          next_action_due_date?: string | null
+          notes?: string | null
+          rejection_reason?: string | null
+          reminder_enabled?: boolean | null
+          scheme_id?: string
+          status?: string | null
+          submitted_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheme_applications_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "govt_schemes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheme_applications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       search_history: {
         Row: {

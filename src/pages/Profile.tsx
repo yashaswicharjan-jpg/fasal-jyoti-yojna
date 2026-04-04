@@ -128,6 +128,8 @@ const Profile = () => {
             </GlassCard>
           )}
 
+          {activeTab === 'my_posts' && <MyPostsTab />}
+
           {activeTab === 'history' && (
             <div className="space-y-3">
               {searchHistory.length === 0 ? (

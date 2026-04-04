@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { Sun, Moon, MapPin, Calendar, Tractor, History, FileText, Settings, LogOut, Globe } from 'lucide-react';
+import { Sun, Moon, MapPin, Calendar, Tractor, History, FileText, Settings, LogOut, Globe, Edit3 } from 'lucide-react';
+import MyPostsTab from '@/components/Community/MyPostsTab';
 import TopBar from '@/components/TopBar';
 import GlassCard from '@/components/GlassCard';
 import { useAppStore } from '@/store/useAppStore';

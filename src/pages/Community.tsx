@@ -263,91 +263,91 @@ const Community = () => {
             </motion.div>
           ))
         )}
-
-        {/* FAB */}
-        <motion.button
-          onClick={() => setShowCompose(true)}
-          whileTap={{ scale: 0.92 }}
-          className="fixed bottom-20 right-4 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-xl flex items-center justify-center"
-        >
-          <Plus size={24} />
-        </motion.button>
-
-        {/* Compose sheet */}
-        <AnimatePresence>
-          {showCompose && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-foreground/50 flex items-end" onClick={() => setShowCompose(false)}>
-              <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 25 }}
-                className="w-full bg-card rounded-t-3xl p-6 space-y-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                <div className="w-10 h-1 bg-border rounded-full mx-auto" />
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-foreground">📝 {t('community.create_post')}</h3>
-                  <button onClick={() => setShowCompose(false)} className="text-muted-foreground text-xl">✕</button>
-                </div>
-
-                {/* Category */}
-                <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-                  {CATEGORIES.map(cat => (
-                    <button key={cat.id} onClick={() => setNewCategory(cat.id)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap min-h-[40px] ${
-                        newCategory === cat.id ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                      }`}>
-                      {cat.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Text */}
-                <textarea value={newPost} onChange={e => setNewPost(e.target.value)}
-                  placeholder="अपना अनुभव यहाँ लिखें... / Share your farming experience..."
-                  className="w-full h-32 px-4 py-3 rounded-xl bg-muted text-foreground border border-border resize-none text-sm"
-                  maxLength={1000} />
-                <p className="text-right text-xs text-muted-foreground">{newPost.length}/1000</p>
-
-                {/* Image */}
-                {imagePreview ? (
-                  <div className="relative">
-                    <img src={imagePreview} alt="Preview" className="w-full max-h-[200px] object-cover rounded-xl" />
-                    <button onClick={() => { setImagePreview(null); setImageFile(null); }}
-                      className="absolute top-2 right-2 w-7 h-7 rounded-full bg-foreground/70 text-background flex items-center justify-center">
-                      <X size={14} />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <button onClick={() => { imageRef.current?.setAttribute('capture', 'environment'); imageRef.current?.click(); }}
-                      className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-muted text-foreground text-sm font-medium min-h-[44px]">
-                      <Camera size={16} /> {t('community.photo')}
-                    </button>
-                    <button onClick={() => { imageRef.current?.removeAttribute('capture'); imageRef.current?.click(); }}
-                      className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-muted text-foreground text-sm font-medium min-h-[44px]">
-                      <Image size={16} /> {t('community.gallery')}
-                    </button>
-                  </div>
-                )}
-                <input ref={imageRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
-
-                {/* Location */}
-                <input
-                  type="text"
-                  value={locationTag}
-                  onChange={e => setLocationTag(e.target.value)}
-                  placeholder="📍 गाँव/शहर / Village or City (optional)"
-                  className="w-full px-4 py-3 rounded-xl bg-muted text-foreground border border-border text-sm"
-                />
-
-                {/* Submit */}
-                <button onClick={handlePost} disabled={!newPost.trim() || uploadingImage}
-                  className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold min-h-[48px] disabled:opacity-40">
-                  {uploadingImage ? t('common.loading') : '🌾 पोस्ट करें / Share Post'}
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </main>
+
+      {/* FAB - outside main for proper fixed positioning */}
+      <motion.button
+        onClick={() => setShowCompose(true)}
+        whileTap={{ scale: 0.92 }}
+        className="fixed bottom-20 right-4 z-[100] w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-xl flex items-center justify-center"
+      >
+        <Plus size={24} />
+      </motion.button>
+
+      {/* Compose sheet */}
+      <AnimatePresence>
+        {showCompose && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] bg-foreground/50 flex items-end" onClick={() => setShowCompose(false)}>
+            <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25 }}
+              className="w-full bg-card rounded-t-3xl p-6 space-y-4 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+              <div className="w-10 h-1 bg-border rounded-full mx-auto" />
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold text-foreground">📝 {t('community.create_post')}</h3>
+                <button onClick={() => setShowCompose(false)} className="text-muted-foreground text-xl">✕</button>
+              </div>
+
+              {/* Category */}
+              <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+                {CATEGORIES.map(cat => (
+                  <button key={cat.id} onClick={() => setNewCategory(cat.id)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap min-h-[40px] ${
+                      newCategory === cat.id ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                    }`}>
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Text */}
+              <textarea value={newPost} onChange={e => setNewPost(e.target.value)}
+                placeholder="अपना अनुभव यहाँ लिखें... / Share your farming experience..."
+                className="w-full h-32 px-4 py-3 rounded-xl bg-muted text-foreground border border-border resize-none text-sm"
+                maxLength={1000} />
+              <p className="text-right text-xs text-muted-foreground">{newPost.length}/1000</p>
+
+              {/* Image */}
+              {imagePreview ? (
+                <div className="relative">
+                  <img src={imagePreview} alt="Preview" className="w-full max-h-[200px] object-cover rounded-xl" />
+                  <button onClick={() => { setImagePreview(null); setImageFile(null); }}
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-foreground/70 text-background flex items-center justify-center">
+                    <X size={14} />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <button onClick={() => { imageRef.current?.setAttribute('capture', 'environment'); imageRef.current?.click(); }}
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-muted text-foreground text-sm font-medium min-h-[44px]">
+                    <Camera size={16} /> {t('community.photo')}
+                  </button>
+                  <button onClick={() => { imageRef.current?.removeAttribute('capture'); imageRef.current?.click(); }}
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-muted text-foreground text-sm font-medium min-h-[44px]">
+                    <Image size={16} /> {t('community.gallery')}
+                  </button>
+                </div>
+              )}
+              <input ref={imageRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
+
+              {/* Location */}
+              <input
+                type="text"
+                value={locationTag}
+                onChange={e => setLocationTag(e.target.value)}
+                placeholder="📍 गाँव/शहर / Village or City (optional)"
+                className="w-full px-4 py-3 rounded-xl bg-muted text-foreground border border-border text-sm"
+              />
+
+              {/* Submit */}
+              <button onClick={handlePost} disabled={!newPost.trim() || uploadingImage}
+                className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold min-h-[48px] disabled:opacity-40">
+                {uploadingImage ? t('common.loading') : '🌾 पोस्ट करें / Share Post'}
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

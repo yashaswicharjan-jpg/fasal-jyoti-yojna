@@ -56,6 +56,7 @@ const Profile = () => {
 
   const tabs = [
     { key: 'farm' as ProfileTab, icon: Tractor, label: t('profile.farm_details') },
+    { key: 'my_posts' as ProfileTab, icon: Edit3, label: 'My Posts' },
     { key: 'history' as ProfileTab, icon: History, label: t('profile.search_history') },
     { key: 'reports' as ProfileTab, icon: FileText, label: t('profile.ai_reports') },
     { key: 'settings' as ProfileTab, icon: Settings, label: t('profile.settings') },

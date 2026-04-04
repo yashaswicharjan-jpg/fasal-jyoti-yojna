@@ -59,8 +59,9 @@ const PostActions = ({ postId, initialLikes, initialComments, isSample }: PostAc
         p_user_id: user.id,
       });
       if (error) throw error;
-      setLiked(data.liked);
-      setLikeCount(data.count);
+      const result = data as unknown as { liked: boolean; count: number };
+      setLiked(result.liked);
+      setLikeCount(result.count);
     } catch {
       setLiked(!optimistic);
       setLikeCount(c => optimistic ? Math.max(0, c - 1) : c + 1);

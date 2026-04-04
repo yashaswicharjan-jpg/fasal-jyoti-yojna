@@ -9,7 +9,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
-type ProfileTab = 'farm' | 'history' | 'reports' | 'settings';
+type ProfileTab = 'farm' | 'history' | 'reports' | 'my_posts' | 'settings';
 
 const FEATURE_META: Record<string, { label: string; icon: string }> = {
   disease_detection: { label: 'Disease Check', icon: '🦠' },

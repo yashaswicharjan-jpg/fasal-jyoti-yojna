@@ -93,11 +93,48 @@ export type Database = {
           },
         ]
       }
+      comment_likes: {
+        Row: {
+          comment_id: string | null
+          created_at: string | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          comment_id?: string | null
+          created_at?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          comment_id?: string | null
+          created_at?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_likes_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comment_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           comment_text: string
           created_at: string | null
           id: string
+          likes_count: number | null
           post_id: string
           user_id: string
         }
@@ -105,6 +142,7 @@ export type Database = {
           comment_text: string
           created_at?: string | null
           id?: string
+          likes_count?: number | null
           post_id: string
           user_id: string
         }
@@ -112,6 +150,7 @@ export type Database = {
           comment_text?: string
           created_at?: string | null
           id?: string
+          likes_count?: number | null
           post_id?: string
           user_id?: string
         }
@@ -135,27 +174,36 @@ export type Database = {
       community_posts: {
         Row: {
           category: string | null
+          comments_count: number | null
           content: string
           created_at: string | null
           id: string
+          image_url: string | null
+          location_tag: string | null
           media_url: string | null
           upvotes_count: number | null
           user_id: string
         }
         Insert: {
           category?: string | null
+          comments_count?: number | null
           content: string
           created_at?: string | null
           id?: string
+          image_url?: string | null
+          location_tag?: string | null
           media_url?: string | null
           upvotes_count?: number | null
           user_id: string
         }
         Update: {
           category?: string | null
+          comments_count?: number | null
           content?: string
           created_at?: string | null
           id?: string
+          image_url?: string | null
+          location_tag?: string | null
           media_url?: string | null
           upvotes_count?: number | null
           user_id?: string
@@ -303,6 +351,42 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      post_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -458,7 +542,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      add_comment: {
+        Args: { p_comment: string; p_post_id: string; p_user_id: string }
+        Returns: string
+      }
+      toggle_post_like: {
+        Args: { p_post_id: string; p_user_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

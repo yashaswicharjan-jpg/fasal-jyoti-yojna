@@ -1,14 +1,15 @@
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { Sun, Moon, MapPin, Calendar, Tractor, History, FileText, Settings, LogOut, Globe } from 'lucide-react';
+import { Sun, Moon, MapPin, Calendar, Tractor, History, FileText, Settings, LogOut, Globe, Edit3 } from 'lucide-react';
+import MyPostsTab from '@/components/Community/MyPostsTab';
 import TopBar from '@/components/TopBar';
 import GlassCard from '@/components/GlassCard';
 import { useAppStore } from '@/store/useAppStore';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
-type ProfileTab = 'farm' | 'history' | 'reports' | 'settings';
+type ProfileTab = 'farm' | 'history' | 'reports' | 'my_posts' | 'settings';
 
 const FEATURE_META: Record<string, { label: string; icon: string }> = {
   disease_detection: { label: 'Disease Check', icon: '🦠' },
@@ -55,6 +56,7 @@ const Profile = () => {
 
   const tabs = [
     { key: 'farm' as ProfileTab, icon: Tractor, label: t('profile.farm_details') },
+    { key: 'my_posts' as ProfileTab, icon: Edit3, label: 'My Posts' },
     { key: 'history' as ProfileTab, icon: History, label: t('profile.search_history') },
     { key: 'reports' as ProfileTab, icon: FileText, label: t('profile.ai_reports') },
     { key: 'settings' as ProfileTab, icon: Settings, label: t('profile.settings') },
@@ -125,6 +127,8 @@ const Profile = () => {
               </div>
             </GlassCard>
           )}
+
+          {activeTab === 'my_posts' && <MyPostsTab />}
 
           {activeTab === 'history' && (
             <div className="space-y-3">

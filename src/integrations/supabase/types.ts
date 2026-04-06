@@ -221,30 +221,42 @@ export type Database = {
       farms: {
         Row: {
           created_at: string | null
+          farm_description: string | null
+          farming_type: string | null
           gps_coordinates: unknown
           id: string
+          irrigation_type: string | null
           land_size_acres: number | null
           primary_crop: string | null
+          secondary_crops: string[] | null
           soil_type_manual: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
+          farm_description?: string | null
+          farming_type?: string | null
           gps_coordinates?: unknown
           id?: string
+          irrigation_type?: string | null
           land_size_acres?: number | null
           primary_crop?: string | null
+          secondary_crops?: string[] | null
           soil_type_manual?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
+          farm_description?: string | null
+          farming_type?: string | null
           gps_coordinates?: unknown
           id?: string
+          irrigation_type?: string | null
           land_size_acres?: number | null
           primary_crop?: string | null
+          secondary_crops?: string[] | null
           soil_type_manual?: string | null
           updated_at?: string | null
           user_id?: string
@@ -391,34 +403,46 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string | null
+          date_of_birth: string | null
           full_name: string
+          gender: string | null
           id: string
           location_village: string | null
           phone_number: string | null
           preferred_language: string | null
+          preferred_theme: string | null
           state: string | null
           updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
           full_name: string
+          gender?: string | null
           id: string
           location_village?: string | null
           phone_number?: string | null
           preferred_language?: string | null
+          preferred_theme?: string | null
           state?: string | null
           updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
           full_name?: string
+          gender?: string | null
           id?: string
           location_village?: string | null
           phone_number?: string | null
           preferred_language?: string | null
+          preferred_theme?: string | null
           state?: string | null
           updated_at?: string | null
         }

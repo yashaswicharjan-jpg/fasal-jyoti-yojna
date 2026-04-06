@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, MessageCircle, Share2, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,6 +21,7 @@ interface Comment {
 }
 
 const PostActions = ({ postId, initialLikes, initialComments, isSample }: PostActionsProps) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(initialLikes);
@@ -94,7 +96,6 @@ const PostActions = ({ postId, initialLikes, initialComments, isSample }: PostAc
         p_comment: commentText.trim(),
       });
       setCommentText('');
-      // Refetch comments
       const { data } = await supabase
         .from('comments')
         .select('*, profiles(full_name, location_village)')
@@ -113,7 +114,6 @@ const PostActions = ({ postId, initialLikes, initialComments, isSample }: PostAc
     if (navigator.share) {
       navigator.share({
         title: 'Krishi Sahayak',
-        text: 'किसान का अनुभव देखें',
         url: window.location.href,
       });
     }
@@ -129,7 +129,7 @@ const PostActions = ({ postId, initialLikes, initialComments, isSample }: PostAc
           }`}
         >
           <Heart size={16} fill={liked ? 'currentColor' : 'none'} />
-          {likeCount > 0 && likeCount} पसंद
+          {likeCount > 0 && likeCount} {t('community.upvote')}
         </button>
 
         <button
@@ -139,14 +139,14 @@ const PostActions = ({ postId, initialLikes, initialComments, isSample }: PostAc
           }`}
         >
           <MessageCircle size={16} />
-          {commentCount > 0 && commentCount} टिप्पणी
+          {commentCount > 0 && commentCount} {t('community.comment')}
         </button>
 
         <button
           onClick={handleShare}
           className="flex items-center gap-1.5 py-2 px-3 rounded-lg min-h-[40px] text-muted-foreground flex-1 justify-center text-sm font-medium"
         >
-          <Share2 size={16} /> शेयर
+          <Share2 size={16} /> {t('community.share')}
         </button>
       </div>
 
@@ -160,7 +160,7 @@ const PostActions = ({ postId, initialLikes, initialComments, isSample }: PostAc
           >
             {comments.length === 0 && !isSample ? (
               <p className="text-xs text-muted-foreground text-center py-3">
-                अभी कोई टिप्पणी नहीं। पहले टिप्पणी करें!
+                {t('community.no_comments')}
               </p>
             ) : (
               <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -172,7 +172,7 @@ const PostActions = ({ postId, initialLikes, initialComments, isSample }: PostAc
                       </span>
                     </div>
                     <div className="flex-1 bg-muted/50 rounded-xl px-3 py-2">
-                      <p className="text-xs font-semibold text-foreground">{c.profiles?.full_name ?? 'किसान'}</p>
+                      <p className="text-xs font-semibold text-foreground">{c.profiles?.full_name ?? t('community.farmer')}</p>
                       <p className="text-xs text-foreground mt-0.5">{c.comment_text}</p>
                     </div>
                   </div>
@@ -186,7 +186,7 @@ const PostActions = ({ postId, initialLikes, initialComments, isSample }: PostAc
                   value={commentText}
                   onChange={e => setCommentText(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') submitComment(); }}
-                  placeholder="टिप्पणी लिखें..."
+                  placeholder={t('community.add_comment')}
                   className="flex-1 px-3 py-2 rounded-full bg-muted text-foreground text-xs border border-border min-h-[36px]"
                 />
                 <button

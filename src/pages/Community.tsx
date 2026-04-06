@@ -47,14 +47,6 @@ const SAMPLE_STORIES: Post[] = [
   },
 ];
 
-const CATEGORIES = [
-  { id: 'success_story', label: '🏆 सफलता की कहानी' },
-  { id: 'question', label: '❓ सवाल' },
-  { id: 'tip', label: '💡 खेती टिप' },
-  { id: 'market_info', label: '💹 बाज़ार' },
-  { id: 'weather_alert', label: '🌧️ मौसम' },
-];
-
 const Community = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -69,6 +61,14 @@ const Community = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [locationTag, setLocationTag] = useState('');
   const imageRef = useRef<HTMLInputElement>(null);
+
+  const CATEGORIES = [
+    { id: 'success_story', label: `🏆 ${t('community.success_story')}` },
+    { id: 'question', label: `❓ ${t('community.question')}` },
+    { id: 'tip', label: `💡 ${t('community.tip')}` },
+    { id: 'market_info', label: `💹 ${t('community.market_info')}` },
+    { id: 'weather_alert', label: `🌧️ ${t('community.weather_alert')}` },
+  ];
 
   const fetchPosts = async () => {
     const { data, error } = await supabase
@@ -182,8 +182,8 @@ const Community = () => {
     { key: 'all', label: t('community.all') },
     { key: 'question', label: `❓ ${t('community.question')}` },
     { key: 'success_story', label: `🏆 ${t('community.success_story')}` },
-    { key: 'tip', label: '💡 टिप' },
-    { key: 'market_info', label: '💹 बाज़ार' },
+    { key: 'tip', label: `💡 ${t('community.tip')}` },
+    { key: 'market_info', label: `💹 ${t('community.market_info')}` },
   ];
 
   return (
@@ -232,7 +232,7 @@ const Community = () => {
                   </div>
                   {post.category && (
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-primary/10 text-primary">
-                      {CATEGORIES.find(c => c.id === post.category)?.label?.split(' ')[0] ?? '🌾'} {post.category === 'question' ? t('community.question') : post.category === 'success_story' ? t('community.success_story') : post.category}
+                      {CATEGORIES.find(c => c.id === post.category)?.label?.split(' ')[0] ?? '🌾'}
                     </span>
                   )}
                 </div>
@@ -265,7 +265,7 @@ const Community = () => {
         )}
       </main>
 
-      {/* FAB - outside main for proper fixed positioning */}
+      {/* FAB */}
       <motion.button
         onClick={() => setShowCompose(true)}
         whileTap={{ scale: 0.92 }}
@@ -302,7 +302,7 @@ const Community = () => {
 
               {/* Text */}
               <textarea value={newPost} onChange={e => setNewPost(e.target.value)}
-                placeholder="अपना अनुभव यहाँ लिखें... / Share your farming experience..."
+                placeholder={t('community.write_post')}
                 className="w-full h-32 px-4 py-3 rounded-xl bg-muted text-foreground border border-border resize-none text-sm"
                 maxLength={1000} />
               <p className="text-right text-xs text-muted-foreground">{newPost.length}/1000</p>
@@ -335,14 +335,14 @@ const Community = () => {
                 type="text"
                 value={locationTag}
                 onChange={e => setLocationTag(e.target.value)}
-                placeholder="📍 गाँव/शहर / Village or City (optional)"
+                placeholder={`📍 ${t('community.location')}`}
                 className="w-full px-4 py-3 rounded-xl bg-muted text-foreground border border-border text-sm"
               />
 
               {/* Submit */}
               <button onClick={handlePost} disabled={!newPost.trim() || uploadingImage}
                 className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold min-h-[48px] disabled:opacity-40">
-                {uploadingImage ? t('common.loading') : '🌾 पोस्ट करें / Share Post'}
+                {uploadingImage ? t('community.posting') : `🌾 ${t('community.post')}`}
               </button>
             </motion.div>
           </motion.div>

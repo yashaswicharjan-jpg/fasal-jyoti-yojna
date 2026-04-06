@@ -11,29 +11,17 @@ import { supabase } from '@/integrations/supabase/client';
 
 type ProfileTab = 'farm' | 'history' | 'reports' | 'my_posts' | 'settings';
 
-const FEATURE_META: Record<string, { label: string; icon: string }> = {
-  disease_detection: { label: 'Disease Check', icon: '🦠' },
-  soil_analysis: { label: 'Soil Analysis', icon: '🌱' },
-  crop_advisor: { label: 'Crop Advisor', icon: '🌾' },
-  irrigation: { label: 'Irrigation', icon: '💧' },
-  fertilizer: { label: 'Fertilizer', icon: '🧪' },
-  mandi_price: { label: 'Mandi Price', icon: '💹' },
-  weather: { label: 'Weather', icon: '🌤️' },
-  govt_scheme: { label: 'Govt Scheme', icon: '🏛️' },
-  kisan_dost_chat: { label: 'Kisan Dost', icon: '🤖' },
-  yield_prediction: { label: 'Yield Prediction', icon: '📊' },
-};
-
-const formatRelativeTime = (dateStr: string): string => {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  if (days === 1) return 'Yesterday';
-  return `${days} days ago`;
+const FEATURE_META: Record<string, { labelKey: string; icon: string }> = {
+  disease_detection: { labelKey: 'history.disease_detection', icon: '🦠' },
+  soil_analysis: { labelKey: 'history.soil_analysis', icon: '🌱' },
+  crop_advisor: { labelKey: 'history.crop_advisor', icon: '🌾' },
+  irrigation: { labelKey: 'history.irrigation', icon: '💧' },
+  fertilizer: { labelKey: 'history.fertilizer', icon: '🧪' },
+  mandi_price: { labelKey: 'history.crop_advisor', icon: '💹' },
+  weather: { labelKey: 'dashboard.weather', icon: '🌤️' },
+  govt_scheme: { labelKey: 'sidebar.govt_schemes', icon: '🏛️' },
+  kisan_dost_chat: { labelKey: 'chatbot.title', icon: '🤖' },
+  yield_prediction: { labelKey: 'crops.yield', icon: '📊' },
 };
 
 const Profile = () => {
@@ -56,7 +44,7 @@ const Profile = () => {
 
   const tabs = [
     { key: 'farm' as ProfileTab, icon: Tractor, label: t('profile.farm_details') },
-    { key: 'my_posts' as ProfileTab, icon: Edit3, label: 'My Posts' },
+    { key: 'my_posts' as ProfileTab, icon: Edit3, label: t('profile.my_posts') },
     { key: 'history' as ProfileTab, icon: History, label: t('profile.search_history') },
     { key: 'reports' as ProfileTab, icon: FileText, label: t('profile.ai_reports') },
     { key: 'settings' as ProfileTab, icon: Settings, label: t('profile.settings') },
@@ -80,6 +68,18 @@ const Profile = () => {
     : searchHistory.filter(h => h.feature === historyFilter);
 
   const uniqueFeatures = [...new Set(searchHistory.map(h => h.feature).filter(Boolean))];
+
+  const formatRelativeTime = (dateStr: string): string => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    if (mins < 1) return t('common.just_now');
+    if (mins < 60) return `${mins}m`;
+    if (hours < 24) return `${hours}h`;
+    if (days === 1) return t('common.yesterday');
+    return t('common.days_ago', { count: days });
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -135,34 +135,34 @@ const Profile = () => {
               {searchHistory.length === 0 ? (
                 <GlassCard className="flex flex-col items-center justify-center py-8">
                   <span className="text-4xl mb-2">🔍</span>
-                  <p className="text-sm text-muted-foreground text-center">{t('dashboard.no_activity')}</p>
+                  <p className="text-sm text-muted-foreground text-center">{t('profile.no_history_yet')}</p>
                 </GlassCard>
               ) : (
                 <>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">{filteredHistory.length} entries</span>
-                    <button onClick={clearAllHistory} className="text-xs text-destructive font-medium px-2 py-1">{t('profile.clear_all') || 'Clear all'}</button>
+                    <span className="text-xs text-muted-foreground">{t('profile.entries', { count: filteredHistory.length })}</span>
+                    <button onClick={clearAllHistory} className="text-xs text-destructive font-medium px-2 py-1">{t('profile.clear_all')}</button>
                   </div>
 
                   <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
                     {['all', ...uniqueFeatures].map(f => (
                       <button key={f} onClick={() => setHistoryFilter(f)}
                         className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${historyFilter === f ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                        {f === 'all' ? 'All' : `${FEATURE_META[f]?.icon || '🔍'} ${FEATURE_META[f]?.label || f}`}
+                        {f === 'all' ? t('common.all') : `${FEATURE_META[f]?.icon || '🔍'} ${t(FEATURE_META[f]?.labelKey || f)}`}
                       </button>
                     ))}
                   </div>
 
                   <div className="space-y-2">
                     {filteredHistory.map(entry => {
-                      const meta = FEATURE_META[entry.feature] || { label: entry.feature, icon: '🔍' };
+                      const meta = FEATURE_META[entry.feature] || { labelKey: entry.feature, icon: '🔍' };
                       return (
                         <GlassCard key={entry.id} className="flex items-start gap-3 py-3">
                           <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-base flex-shrink-0">
                             {meta.icon}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[11px] font-medium text-primary">{meta.label}</p>
+                            <p className="text-[11px] font-medium text-primary">{t(meta.labelKey)}</p>
                             <p className="text-sm text-foreground truncate">{entry.query}</p>
                             {entry.result_summary && (
                               <p className="text-xs text-muted-foreground truncate mt-0.5">→ {entry.result_summary}</p>
@@ -185,7 +185,7 @@ const Profile = () => {
             <div className="space-y-3">
               {selectedDiag ? (
                 <div className="space-y-3">
-                  <button onClick={() => setSelectedDiag(null)} className="text-sm text-muted-foreground flex items-center gap-1">← Back</button>
+                  <button onClick={() => setSelectedDiag(null)} className="text-sm text-muted-foreground flex items-center gap-1">← {t('common.back')}</button>
                   {selectedDiag.image_url && (
                     <img src={selectedDiag.image_url} alt="Analyzed" className="w-full rounded-xl max-h-48 object-cover" />
                   )}
@@ -195,20 +195,20 @@ const Profile = () => {
                       <div>
                         <p className="font-semibold text-foreground">{selectedDiag.result_title}</p>
                         <p className="text-xs text-muted-foreground">
-                          {selectedDiag.detection_type === 'disease' ? 'Disease Detection' : 'Soil Analysis'} · {selectedDiag.created_at && formatRelativeTime(selectedDiag.created_at)}
+                          {selectedDiag.detection_type === 'disease' ? t('profile.disease_detection') : t('history.soil_analysis')} · {selectedDiag.created_at && formatRelativeTime(selectedDiag.created_at)}
                         </p>
                       </div>
                     </div>
                   </GlassCard>
                   {selectedDiag.treatment_plan && (
                     <GlassCard className="space-y-1 border-l-4 border-primary/40">
-                      <p className="text-xs font-medium text-primary">🧪 Chemical Treatment</p>
+                      <p className="text-xs font-medium text-primary">🧪 {t('profile.chemical_treatment')}</p>
                       <p className="text-sm text-foreground">{selectedDiag.treatment_plan}</p>
                     </GlassCard>
                   )}
                   {selectedDiag.organic_options && (
                     <GlassCard className="space-y-1 border-l-4 border-secondary/40">
-                      <p className="text-xs font-medium text-secondary">🌿 Organic Alternative</p>
+                      <p className="text-xs font-medium text-secondary">🌿 {t('profile.organic_alternative')}</p>
                       <p className="text-sm text-foreground">{selectedDiag.organic_options}</p>
                     </GlassCard>
                   )}
@@ -216,11 +216,11 @@ const Profile = () => {
               ) : diagnostics.length === 0 ? (
                 <GlassCard className="flex flex-col items-center justify-center py-8">
                   <span className="text-4xl mb-2">🔬</span>
-                  <p className="text-sm text-muted-foreground text-center">{t('community.no_reports')}</p>
+                  <p className="text-sm text-muted-foreground text-center">{t('profile.no_reports_yet')}</p>
                 </GlassCard>
               ) : (
                 <>
-                  <p className="text-xs text-muted-foreground">{diagnostics.length} AI reports saved</p>
+                  <p className="text-xs text-muted-foreground">{t('profile.reports_saved', { count: diagnostics.length })}</p>
                   <div className="grid grid-cols-2 gap-3">
                     {diagnostics.map((d) => (
                       <GlassCard key={d.id} onClick={() => setSelectedDiag(d)} className="cursor-pointer space-y-2">

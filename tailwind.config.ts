@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['"Noto Sans"', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -53,6 +54,10 @@ export default {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        glow: {
+          primary: "hsl(var(--glow-primary))",
+          accent: "hsl(var(--glow-accent))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

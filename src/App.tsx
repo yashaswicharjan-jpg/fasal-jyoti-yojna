@@ -7,6 +7,7 @@ import BottomNav from "@/components/BottomNav";
 import KisanDostChatbot from "@/components/KisanDostChatbot";
 import OfflineBanner from "@/components/OfflineBanner";
 import InstallPrompt from "@/components/InstallPrompt";
+import EtherBackground from "@/components/EtherBackground";
 import Dashboard from "@/pages/Dashboard";
 import Diagnose from "@/pages/Diagnose";
 import CropAdvisor from "@/pages/CropAdvisor";
@@ -24,9 +25,33 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen bg-background flex items-center justify-center"><span className="text-4xl animate-pulse">🌾</span></div>;
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <motion.span
+        animate={{ scale: [1, 1.3, 1], rotate: [0, 10, -10, 0] }}
+        transition={{ duration: 2, repeat: Infinity }}
+        className="text-5xl"
+      >
+        🌾
+      </motion.span>
+    </div>
+  );
   if (!user) return <Navigate to="/auth" replace />;
   return <>{children}</>;
+};
+
+// Warp-speed page transition
+const pageVariants = {
+  initial: { opacity: 0, scale: 0.96, y: 20 },
+  animate: { opacity: 1, scale: 1, y: 0 },
+  exit: { opacity: 0, scale: 1.03, y: -10 },
+};
+
+const pageTransition = {
+  type: 'spring' as const,
+  stiffness: 200,
+  damping: 25,
+  mass: 0.8,
 };
 
 const AnimatedRoutes = () => {
@@ -38,10 +63,11 @@ const AnimatedRoutes = () => {
     <AnimatePresence mode="wait">
       <motion.div
         key={location.pathname}
-        initial={isSlowConnection ? undefined : { opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={isSlowConnection ? undefined : { opacity: 0, y: -10 }}
-        transition={{ duration: isSlowConnection ? 0 : 0.25 }}
+        variants={isSlowConnection ? undefined : pageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        transition={isSlowConnection ? { duration: 0 } : pageTransition}
       >
         <Routes location={location}>
           <Route path="/auth" element={user ? <Navigate to="/" replace /> : <Auth />} />
@@ -86,6 +112,7 @@ const AppContent = () => {
 
   return (
     <>
+      <EtherBackground />
       <OfflineBanner />
       <AnimatedRoutes />
       {user && !isAuthPage && <BottomNav />}

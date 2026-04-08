@@ -1,24 +1,17 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import {
-  Sprout,
-  Wheat,
-  Bug,
-  Users,
-  Thermometer,
-  Droplets,
-  CloudRain,
-  Wind,
-  RefreshCw,
-  AlertTriangle,
-  Clock,
+  Sprout, Wheat, Bug, Clock,
+  Thermometer, Droplets, CloudRain, Wind,
+  RefreshCw, AlertTriangle,
 } from 'lucide-react';
 import TopBar from '@/components/TopBar';
 import GlassCard from '@/components/GlassCard';
 import SeedLoader from '@/components/SeedLoader';
 import WeeklyForecast from '@/components/WeeklyForecast';
+import FloatingSection from '@/components/FloatingSection';
+import MandiTicker from '@/components/MandiTicker';
 import { useConnectivity } from '@/utils/connectivity';
 
 interface WeatherData {
@@ -100,27 +93,32 @@ const Dashboard = () => {
       ]
     : [];
 
-  // Frost/heat alerts
   const frostAlert = dailyData?.temperature_2m_min?.[0] < 4;
   const heatAlert = dailyData?.temperature_2m_max?.slice(0, 3).every((t: number) => t > 40);
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="ether-bg pb-20">
       <TopBar />
       <main className="px-4 py-4 max-w-lg mx-auto space-y-5">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+        {/* Welcome */}
+        <FloatingSection index={0} float="none">
           <h2 className="text-2xl font-bold text-foreground">{t('dashboard.welcome')}</h2>
           <p className="text-muted-foreground text-sm">🌾 {t('app_name')}</p>
-        </motion.div>
+        </FloatingSection>
+
+        {/* Mandi Ticker */}
+        <FloatingSection index={1} float="none">
+          <MandiTicker />
+        </FloatingSection>
 
         {/* Weather Card */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}>
+        <FloatingSection index={2} float="slow">
           <GlassCard className="relative overflow-hidden">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-foreground">{t('dashboard.weather')}</h3>
               <button
                 onClick={fetchWeather}
-                className="p-2 rounded-full hover:bg-muted transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="p-2 rounded-full hover:bg-muted/50 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <RefreshCw size={18} className={`text-muted-foreground ${refreshing ? 'animate-spin' : ''}`} />
               </button>
@@ -131,21 +129,21 @@ const Dashboard = () => {
             ) : weather ? (
               <>
                 {weather.rainProbability > 60 && (
-                  <div className="flex items-center gap-2 p-3 mb-3 rounded-xl bg-accent/20 border border-accent/30">
+                  <div className="flex items-center gap-2 p-3 mb-3 rounded-xl bg-accent/15 border border-accent/25 backdrop-blur">
                     <AlertTriangle size={18} className="text-accent flex-shrink-0" />
                     <p className="text-sm font-medium text-foreground">{t('dashboard.skip_irrigation')}</p>
                   </div>
                 )}
 
                 {frostAlert && (
-                  <div className="flex items-center gap-2 p-3 mb-3 rounded-xl bg-destructive/15 border border-destructive/30">
+                  <div className="flex items-center gap-2 p-3 mb-3 rounded-xl bg-destructive/10 border border-destructive/25 backdrop-blur">
                     <AlertTriangle size={18} className="text-destructive flex-shrink-0" />
                     <p className="text-sm font-medium text-foreground">{t('dashboard.frost_warning')}</p>
                   </div>
                 )}
 
                 {heatAlert && (
-                  <div className="flex items-center gap-2 p-3 mb-3 rounded-xl bg-accent/20 border border-accent/30">
+                  <div className="flex items-center gap-2 p-3 mb-3 rounded-xl bg-accent/15 border border-accent/25 backdrop-blur">
                     <AlertTriangle size={18} className="text-accent flex-shrink-0" />
                     <p className="text-sm font-medium text-foreground">{t('dashboard.heat_warning')}</p>
                   </div>
@@ -155,7 +153,7 @@ const Dashboard = () => {
                   {weatherStats.map((s) => (
                     <div key={s.label} className="flex flex-col items-center gap-1 text-center">
                       <s.icon size={20} className="text-primary" />
-                      <span className="text-lg font-bold text-foreground">{s.value}</span>
+                      <span className="text-lg font-bold text-foreground font-mono">{s.value}</span>
                       <span className="text-[10px] text-muted-foreground leading-tight">{s.label}</span>
                     </div>
                   ))}
@@ -165,20 +163,20 @@ const Dashboard = () => {
               <p className="text-muted-foreground text-sm text-center py-4">{t('common.error')}</p>
             )}
           </GlassCard>
-        </motion.div>
+        </FloatingSection>
 
         {/* 7-Day Forecast */}
         {!isSlowConnection && dailyData && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.4 }}>
+          <FloatingSection index={3} float="medium">
             <WeeklyForecast dailyData={dailyData} />
-          </motion.div>
+          </FloatingSection>
         )}
 
         {/* Quick Actions */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.4 }}>
+        <FloatingSection index={4} float="slow">
           <h3 className="font-semibold text-foreground mb-3">{t('dashboard.quick_actions')}</h3>
           <div className="grid grid-cols-2 gap-3">
-            {quickActions.map((action) => (
+            {quickActions.map((action, i) => (
               <GlassCard key={action.label} onClick={() => navigate(action.path)} className="flex flex-col items-center gap-3 py-6">
                 <div className={action.pulse && !isSlowConnection ? 'animate-pulse-scale' : ''}>
                   <action.icon size={32} className={action.color} />
@@ -187,15 +185,15 @@ const Dashboard = () => {
               </GlassCard>
             ))}
           </div>
-        </motion.div>
+        </FloatingSection>
 
         {/* Recent Activity */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.4 }}>
+        <FloatingSection index={5} float="medium">
           <h3 className="font-semibold text-foreground mb-3">{t('dashboard.recent_activity')}</h3>
           <GlassCard className="flex items-center justify-center py-8">
             <p className="text-muted-foreground text-sm">{t('dashboard.no_activity')}</p>
           </GlassCard>
-        </motion.div>
+        </FloatingSection>
       </main>
     </div>
   );

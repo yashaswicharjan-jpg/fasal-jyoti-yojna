@@ -35,6 +35,7 @@ const KisanDostChatbot = () => {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const stopRecognitionRef = useRef<(() => void) | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -56,11 +57,6 @@ const KisanDostChatbot = () => {
       (text) => {
         setInput(text);
         setIsListening(false);
-        // Auto-send after voice input
-        setTimeout(() => {
-          const fakeEvent = { key: 'Enter' } as React.KeyboardEvent;
-          // We'll trigger send directly
-        }, 100);
       },
       () => setIsListening(false)
     );
@@ -71,7 +67,6 @@ const KisanDostChatbot = () => {
     }
     stopRecognitionRef.current = stop;
 
-    // Auto-stop after 10 seconds
     setTimeout(() => {
       if (stopRecognitionRef.current) {
         stopRecognitionRef.current();
@@ -80,11 +75,9 @@ const KisanDostChatbot = () => {
     }, 10000);
   }, [isListening, language, i18n.language]);
 
-  // Auto-send when input is set via voice
   const prevInputRef = useRef('');
   useEffect(() => {
     if (input && input !== prevInputRef.current && !isListening && prevInputRef.current === '') {
-      // Voice input just completed, auto-send
       setTimeout(() => handleSend(), 200);
     }
     prevInputRef.current = input;
@@ -180,34 +173,83 @@ const KisanDostChatbot = () => {
 
   return (
     <>
+      {/* AI Oracle Button — glowing liquid orb */}
       {!isOpen && (
-        <motion.button initial={{ scale: 0 }} animate={{ scale: 1 }} onClick={() => setIsOpen(true)}
-          className="fixed bottom-20 right-4 z-50 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-xl flex items-center justify-center animate-bounce-gentle">
-          <span className="text-2xl">🌾</span>
+        <motion.button
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.5 }}
+          onClick={() => setIsOpen(true)}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          className="fixed bottom-20 right-4 z-50 w-16 h-16 rounded-full flex items-center justify-center animate-oracle-glow"
+          style={{
+            background: 'radial-gradient(circle at 35% 35%, hsl(var(--glow-primary)), hsl(var(--primary)), hsl(var(--ether-from)))',
+          }}
+        >
+          <motion.div
+            animate={isHovered ? { rotate: 360, scale: 1.15 } : { rotate: 0, scale: 1 }}
+            transition={{ duration: 0.8, ease: 'easeInOut' }}
+          >
+            <span className="text-2xl filter drop-shadow-lg">🌾</span>
+          </motion.div>
+          {/* Orbiting ring on hover */}
+          <AnimatePresence>
+            {isHovered && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.6 }}
+                animate={{ opacity: 1, scale: 1, rotate: 360 }}
+                exit={{ opacity: 0, scale: 0.6 }}
+                transition={{ rotate: { duration: 3, repeat: Infinity, ease: 'linear' }, opacity: { duration: 0.3 } }}
+                className="absolute inset-[-4px] rounded-full border-2 border-dashed border-accent/50"
+              />
+            )}
+          </AnimatePresence>
         </motion.button>
       )}
+
       <AnimatePresence>
         {isOpen && (
-          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-x-0 bottom-0 z-50 h-[85vh] bg-card rounded-t-3xl shadow-2xl flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-border">
+          <motion.div
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            className="fixed inset-x-0 bottom-0 z-50 h-[85vh] bg-card/80 backdrop-blur-3xl rounded-t-3xl shadow-2xl flex flex-col border-t border-border/30"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-border/30">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center"><span className="text-xl">🌾</span></div>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center animate-oracle-glow"
+                  style={{ background: 'radial-gradient(circle, hsl(var(--glow-primary)), hsl(var(--primary)))' }}>
+                  <span className="text-lg">🌾</span>
+                </div>
                 <div>
                   <h3 className="font-bold text-foreground text-sm">{t('chatbot.title')}</h3>
                   <p className="text-xs text-muted-foreground">{t('chatbot.subtitle')}</p>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+              <motion.button whileTap={{ scale: 0.9 }} onClick={() => setIsOpen(false)}
+                className="w-10 h-10 rounded-full bg-muted/50 backdrop-blur flex items-center justify-center border border-border/30">
                 <X size={18} className="text-foreground" />
-              </button>
+              </motion.button>
             </div>
+
+            {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {messages.map((msg) => (
-                <motion.div key={msg.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${msg.role === 'user' ? 'bg-primary text-primary-foreground rounded-br-md' : 'glass-card-solid rounded-bl-md'}`}>
+              {messages.map((msg, i) => (
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${
+                    msg.role === 'user'
+                      ? 'bg-primary text-primary-foreground rounded-br-md'
+                      : 'glass-card-solid rounded-bl-md'
+                  }`}>
                     {msg.role === 'assistant' ? (
                       <div className="prose prose-sm max-w-none text-foreground [&_strong]:text-foreground [&_p]:text-foreground [&_li]:text-foreground">
                         <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -221,7 +263,7 @@ const KisanDostChatbot = () => {
                   <div className="glass-card-solid px-4 py-3 rounded-2xl rounded-bl-md">
                     <div className="flex gap-1.5">
                       {[0, 1, 2].map((i) => (
-                        <div key={i} className="w-2 h-2 rounded-full bg-muted-foreground" style={{ animation: `dot-pulse 1.4s ease-in-out ${i * 0.2}s infinite` }} />
+                        <div key={i} className="w-2 h-2 rounded-full bg-primary/60" style={{ animation: `dot-pulse 1.4s ease-in-out ${i * 0.2}s infinite` }} />
                       ))}
                     </div>
                   </div>
@@ -229,27 +271,34 @@ const KisanDostChatbot = () => {
               )}
               <div ref={messagesEndRef} />
             </div>
-            <div className="p-4 border-t border-border safe-area-bottom">
+
+            {/* Input */}
+            <div className="p-4 border-t border-border/30 safe-area-bottom">
               <div className="flex items-center gap-2">
-                {/* Voice button */}
-                <button
+                <motion.button
+                  whileTap={{ scale: 0.85 }}
                   onClick={handleVoiceInput}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                  className={`w-11 h-11 rounded-full flex items-center justify-center transition-all border ${
                     isListening
-                      ? 'bg-destructive text-destructive-foreground animate-pulse'
-                      : 'bg-muted text-muted-foreground hover:text-foreground'
+                      ? 'bg-destructive text-destructive-foreground border-destructive animate-pulse'
+                      : 'bg-card/60 backdrop-blur text-muted-foreground border-border/30 hover:text-foreground hover:border-primary/30'
                   }`}
                 >
                   {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-                </button>
+                </motion.button>
                 <input value={input} onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                   placeholder={isListening ? (t('chatbot.listening') || '🎤 Listening...') : t('chatbot.placeholder')}
-                  className="flex-1 px-4 py-2.5 rounded-full bg-muted text-foreground text-sm border border-border min-h-[44px]" />
-                <button onClick={handleSend} disabled={!input.trim() || isTyping}
-                  className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-40">
+                  className="flex-1 px-4 py-2.5 rounded-full bg-card/60 backdrop-blur text-foreground text-sm border border-border/30 min-h-[44px] focus:border-primary/40 focus:outline-none transition-colors" />
+                <motion.button
+                  whileTap={{ scale: 0.85 }}
+                  onClick={handleSend}
+                  disabled={!input.trim() || isTyping}
+                  className="w-11 h-11 rounded-full bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-30"
+                  style={{ boxShadow: '0 4px 14px hsl(var(--glow-primary) / 0.3)' }}
+                >
                   <Send size={18} />
-                </button>
+                </motion.button>
               </div>
               {isListening && (
                 <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}

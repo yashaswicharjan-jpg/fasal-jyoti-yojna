@@ -12,6 +12,7 @@ import SeedLoader from '@/components/SeedLoader';
 import WeeklyForecast from '@/components/WeeklyForecast';
 import FloatingSection from '@/components/FloatingSection';
 import MandiTicker from '@/components/MandiTicker';
+import HeroSlider from '@/components/HeroSlider';
 import { useConnectivity } from '@/utils/connectivity';
 
 interface WeatherData {
@@ -82,6 +83,8 @@ const Dashboard = () => {
     { icon: Wheat, label: t('dashboard.my_crops'), path: '/crops', color: 'text-secondary' },
     { icon: Bug, label: t('dashboard.disease_check'), path: '/diagnose', color: 'text-destructive', pulse: true },
     { icon: Clock, label: t('history.title'), path: '/history', color: 'text-primary' },
+    { icon: Sprout, label: '🌾 Farm Portfolio', path: '/farm-portfolio', color: 'text-primary' },
+    { icon: Wheat, label: '🛒 Krishi Market', path: '/marketplace', color: 'text-accent' },
   ];
 
   const weatherStats = weather
@@ -106,8 +109,13 @@ const Dashboard = () => {
           <p className="text-muted-foreground text-sm">🌾 {t('app_name')}</p>
         </FloatingSection>
 
-        {/* Mandi Ticker */}
+        {/* Hero Slider */}
         <FloatingSection index={1} float="none">
+          <HeroSlider />
+        </FloatingSection>
+
+        {/* Mandi Ticker */}
+        <FloatingSection index={2} float="none">
           <MandiTicker />
         </FloatingSection>
 

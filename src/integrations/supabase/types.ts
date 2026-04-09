@@ -218,6 +218,51 @@ export type Database = {
           },
         ]
       }
+      farm_fields: {
+        Row: {
+          area_acres: number | null
+          created_at: string
+          crop_name: string | null
+          field_name: string
+          id: string
+          irrigation_type: string | null
+          latitude: number | null
+          longitude: number | null
+          notes: string | null
+          soil_type: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          area_acres?: number | null
+          created_at?: string
+          crop_name?: string | null
+          field_name: string
+          id?: string
+          irrigation_type?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          soil_type?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          area_acres?: number | null
+          created_at?: string
+          crop_name?: string | null
+          field_name?: string
+          id?: string
+          irrigation_type?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          soil_type?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       farms: {
         Row: {
           created_at: string | null
@@ -364,6 +409,56 @@ export type Database = {
         }
         Relationships: []
       }
+      orders: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          delivery_address: string | null
+          id: string
+          listing_id: string
+          notes: string | null
+          quantity_kg: number
+          seller_id: string
+          status: string
+          total_price: number
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          delivery_address?: string | null
+          id?: string
+          listing_id: string
+          notes?: string | null
+          quantity_kg: number
+          seller_id: string
+          status?: string
+          total_price: number
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          delivery_address?: string | null
+          id?: string
+          listing_id?: string
+          notes?: string | null
+          quantity_kg?: number
+          seller_id?: string
+          status?: string
+          total_price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "produce_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_likes: {
         Row: {
           created_at: string | null
@@ -399,6 +494,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      produce_listings: {
+        Row: {
+          created_at: string
+          crop_name: string
+          description: string | null
+          harvest_date: string | null
+          id: string
+          image_url: string | null
+          location: string | null
+          price_per_kg: number
+          quantity_kg: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          crop_name: string
+          description?: string | null
+          harvest_date?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          price_per_kg: number
+          quantity_kg: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          crop_name?: string
+          description?: string | null
+          harvest_date?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          price_per_kg?: number
+          quantity_kg?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

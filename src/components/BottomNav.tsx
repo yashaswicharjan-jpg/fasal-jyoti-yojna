@@ -1,12 +1,12 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Home, Leaf, Wheat, Users, User } from 'lucide-react';
+import { Home, Leaf, ShoppingCart, Users, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const tabs = [
   { path: '/', icon: Home, key: 'nav.home' },
   { path: '/diagnose', icon: Leaf, key: 'nav.diagnose' },
-  { path: '/crops', icon: Wheat, key: 'nav.crops' },
+  { path: '/marketplace', icon: ShoppingCart, key: 'Krishi Market' },
   { path: '/community', icon: Users, key: 'nav.community' },
   { path: '/profile', icon: User, key: 'nav.profile' },
 ];

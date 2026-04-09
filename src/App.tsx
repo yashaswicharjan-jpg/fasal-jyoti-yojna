@@ -14,6 +14,9 @@ import CropAdvisor from "@/pages/CropAdvisor";
 import Community from "@/pages/Community";
 import Profile from "@/pages/Profile";
 import FarmHistory from "@/pages/FarmHistory";
+import FarmPortfolio from "@/pages/FarmPortfolio";
+import Marketplace from "@/pages/Marketplace";
+import SoilTestGuide from "@/pages/SoilTestGuide";
 import Auth from "@/pages/Auth";
 import NotFound from "@/pages/NotFound";
 import { useEffect } from "react";
@@ -77,6 +80,9 @@ const AnimatedRoutes = () => {
           <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/history" element={<ProtectedRoute><FarmHistory /></ProtectedRoute>} />
+          <Route path="/farm-portfolio" element={<ProtectedRoute><FarmPortfolio /></ProtectedRoute>} />
+          <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
+          <Route path="/soil-test" element={<ProtectedRoute><SoilTestGuide /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>

@@ -6,6 +6,7 @@ import TopBar from '@/components/TopBar';
 import GlassCard from '@/components/GlassCard';
 import SeedLoader from '@/components/SeedLoader';
 import SpeakButton from '@/components/SpeakButton';
+import DiagnosticFeedback from '@/components/Diagnose/DiagnosticFeedback';
 import { compressImage, formatBytes } from '@/utils/imageCompression';
 import { shareOnWhatsApp, formatDiseaseForWhatsApp } from '@/utils/sharing';
 import { supabase } from '@/integrations/supabase/client';
@@ -65,7 +66,6 @@ const Diagnose = () => {
 
       setResult(data.result);
 
-      // Save to database
       if (user && data.result) {
         await logAIDiagnostic({
           detection_type: mode,
@@ -79,7 +79,6 @@ const Diagnose = () => {
           result_summary: mode === 'disease' ? data.result.DiseaseName : data.result.SoilType,
         });
 
-        // Also save to ai_chat_history
         try {
           await supabase.from('ai_chat_history').insert({
             user_id: user.id,
@@ -92,11 +91,10 @@ const Diagnose = () => {
     } catch (err: any) {
       console.error('AI analysis error:', err);
       toast.error(t('diagnose.analysis_failed'));
-      // Fallback mock data
       if (mode === 'disease') {
         setResult({
           DiseaseName: 'Late Blight', DiseaseNameHindi: 'पछेती अंगमारी',
-          Severity: 'Medium', Confidence: '85%',
+          Severity: 'Medium', Confidence: '72%',
           ChemicalCure: 'Mancozeb 75% WP', ChemicalDosage: '2.5 g/L water',
           OrganicAlternative: 'Neem oil spray',
           OrganicMethod: 'Mix 5ml neem oil per liter of water, spray on affected leaves early morning',
@@ -106,7 +104,7 @@ const Diagnose = () => {
         });
       } else {
         setResult({
-          SoilType: 'Black Cotton Soil', pH: '7.2 - 7.8', Fertility: 'Medium',
+          SoilType: 'Black Cotton Soil', pH: '7.2 - 7.8', Fertility: 'Medium', Confidence: '68%',
           RecommendedCrops: ['Cotton', 'Soybean', 'Sorghum'],
           Deficiencies: ['Zinc', 'Iron'],
           Amendments: 'Add Zinc Sulphate (25 kg/ha) and FeSO4 (50 kg/ha).',
@@ -114,6 +112,11 @@ const Diagnose = () => {
       }
     }
     setAnalyzing(false);
+  };
+
+  const handleRefinedResult = (refined: any) => {
+    setResult(refined);
+    toast.success(t('diagnose.diagnosis_refined'));
   };
 
   const severityColor = (s: string) => {
@@ -253,6 +256,9 @@ const Diagnose = () => {
                     <div><span className="text-muted-foreground">pH:</span> <span className="font-medium text-foreground">{result.pH}</span></div>
                     <div><span className="text-muted-foreground">Fertility:</span> <span className="font-medium text-foreground">{result.Fertility}</span></div>
                   </div>
+                  {result.Confidence && (
+                    <p className="text-sm text-foreground">{t('diagnose.confidence')}: {result.Confidence}</p>
+                  )}
                   <div>
                     <p className="text-sm font-medium text-foreground mb-1">Recommended Crops:</p>
                     <div className="flex flex-wrap gap-2">
@@ -272,6 +278,9 @@ const Diagnose = () => {
                   <p className="text-sm text-muted-foreground">{result.Amendments}</p>
                 </GlassCard>
               )}
+
+              {/* Diagnostic Feedback Loop */}
+              <DiagnosticFeedback mode={mode} result={result} onRefinedResult={handleRefinedResult} />
             </motion.div>
           )}
         </AnimatePresence>

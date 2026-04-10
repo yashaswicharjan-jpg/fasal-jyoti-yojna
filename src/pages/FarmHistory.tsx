@@ -94,9 +94,14 @@ const FarmHistory = () => {
       <div className="min-h-screen bg-background pb-20">
         <TopBar title={t('history.detail_title')} />
         <main className="px-4 py-4 max-w-lg mx-auto space-y-4">
-          <button onClick={() => setSelectedItem(null)} className="flex items-center gap-1 text-sm text-muted-foreground">
-            <ArrowLeft size={16} /> {t('crops.back')}
-          </button>
+          <div className="flex items-center justify-between">
+            <button onClick={() => setSelectedItem(null)} className="flex items-center gap-1 text-sm text-muted-foreground">
+              <ArrowLeft size={16} /> {t('crops.back')}
+            </button>
+            <button onClick={(e) => handleDelete(selectedItem.id, e)} className="flex items-center gap-1 text-sm text-destructive hover:text-destructive/80 transition-colors">
+              <Trash2 size={16} /> {t('history.delete') || 'Delete'}
+            </button>
+          </div>
 
           <GlassCard className="space-y-3">
             <div className="flex items-center gap-3">

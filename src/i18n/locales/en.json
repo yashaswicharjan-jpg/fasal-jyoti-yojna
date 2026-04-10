@@ -221,7 +221,11 @@
     "crop_advisor": "Crop Advisor",
     "chat": "Kisan Dost Chat",
     "irrigation": "Irrigation",
-    "fertilizer": "Fertilizer"
+    "fertilizer": "Fertilizer",
+    "delete": "Delete",
+    "deleted": "History deleted",
+    "delete_failed": "Failed to delete",
+    "auto_cleanup": "Old records (28+ days) are automatically removed"
   },
   "sidebar": {
     "govt_schemes": "Govt Schemes",

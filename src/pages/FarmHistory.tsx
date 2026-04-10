@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ChevronRight, Leaf, Droplets, Wheat, MessageCircle, FlaskConical, Bug } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Leaf, Droplets, Wheat, MessageCircle, FlaskConical, Bug, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/TopBar';
 import GlassCard from '@/components/GlassCard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import ReactMarkdown from 'react-markdown';
+import { toast } from 'sonner';
 
 const CATEGORY_META: Record<string, { icon: typeof Leaf; label: string; color: string }> = {
   disease_detection: { icon: Bug, label: 'history.disease_detection', color: 'text-destructive' },

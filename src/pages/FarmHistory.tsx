@@ -32,6 +32,16 @@ const FarmHistory = () => {
     if (!user) return;
     const fetchHistory = async () => {
       setLoading(true);
+
+      // Auto-delete records older than 28 days
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - 28);
+      await supabase
+        .from('ai_chat_history')
+        .delete()
+        .eq('user_id', user.id)
+        .lt('created_at', cutoffDate.toISOString());
+
       const { data } = await supabase
         .from('ai_chat_history')
         .select('*')
@@ -43,6 +53,18 @@ const FarmHistory = () => {
     };
     fetchHistory();
   }, [user]);
+
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const { error } = await supabase.from('ai_chat_history').delete().eq('id', id);
+    if (error) {
+      toast.error(t('history.delete_failed') || 'Failed to delete');
+      return;
+    }
+    setHistory(prev => prev.filter(h => h.id !== id));
+    if (selectedItem?.id === id) setSelectedItem(null);
+    toast.success(t('history.deleted') || 'Deleted');
+  };
 
   const uniqueCategories = [...new Set(history.map(h => h.category).filter(Boolean))];
   const filteredHistory = filter === 'all' ? history : history.filter(h => h.category === filter);

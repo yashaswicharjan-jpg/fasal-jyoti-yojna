@@ -39,7 +39,10 @@
     "community": "समुदाय",
     "recent_activity": "हाल की गतिविधि",
     "no_activity": "अभी तक कोई गतिविधि नहीं",
-    "refresh": "ताज़ा करें"
+    "refresh": "ताज़ा करें",
+    "sync_field_location": "मेरे खेत का स्थान सिंक करें",
+    "syncing_location": "आपके खेत का स्थान खोज रहे हैं...",
+    "verified_location": "सत्यापित"
   },
   "diagnose": {
     "title": "AI जाँच",
@@ -61,7 +64,16 @@
     "no_image": "जाँच शुरू करने के लिए एक फोटो लें या अपलोड करें",
     "ai_label": "🤖 AI द्वारा उत्पन्न — कृपया स्थानीय कृषि विशेषज्ञ से पुष्टि करें",
     "share_whatsapp": "WhatsApp पर भेजें",
-    "analysis_failed": "AI जाँच विफल। कृपया पुनः प्रयास करें।"
+    "analysis_failed": "AI जाँच विफल। कृपया पुनः प्रयास करें।",
+    "low_confidence_title": "सटीक जाँच के लिए और जानकारी चाहिए",
+    "low_confidence_desc": "कृपया कुछ सवालों के जवाब दें।",
+    "diagnostic_progress": "जाँच प्रगति",
+    "refine_diagnosis": "✨ AI से जाँच सुधारें",
+    "refining": "जाँच सुधार रहा है...",
+    "diagnosis_refined": "आपके उत्तरों से जाँच सुधारी गई!",
+    "manual_test_title": "मैन्युअल टेस्ट किट गाइड",
+    "view_guide": "गाइड देखें",
+    "test_guide_desc": "इन चरणों का पालन करके सरल खेत परीक्षणों से जाँच की पुष्टि करें।"
   },
   "crops": {
     "title": "फसल सलाहकार",

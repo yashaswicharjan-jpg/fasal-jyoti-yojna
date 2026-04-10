@@ -58,6 +58,7 @@ Analyze the soil image and return a JSON object:
   "SoilType": "type name",
   "pH": "estimated pH range",
   "Fertility": "Low|Medium|High",
+  "Confidence": "percentage string like 80%",
   "RecommendedCrops": ["crop1", "crop2", "crop3"],
   "Deficiencies": ["nutrient1", "nutrient2"],
   "Amendments": "detailed amendment recommendations"
@@ -72,6 +73,14 @@ Only return valid JSON, no markdown wrapping.`;
             ]
           });
         }
+        break;
+
+      case 'diagnostic_followup':
+        systemPrompt = `You are an expert agricultural diagnostician. A farmer has provided follow-up answers to refine an initial AI diagnosis. ${langInstruction}
+Based on the original diagnosis and the farmer's additional observations, provide a REFINED and more accurate diagnosis.
+Return a JSON object in the SAME FORMAT as the original diagnosis, but with updated/corrected values based on the new information.
+If the follow-up answers confirm the original diagnosis, increase the Confidence. If they contradict it, provide a corrected diagnosis.
+Only return valid JSON, no markdown wrapping.`;
         break;
 
       case 'crop_advisor':
@@ -113,7 +122,6 @@ Use emojis. Keep answers practical and actionable. If unsure, say so and recomme
       : "google/gemini-3-flash-preview";
 
     if (mode === 'chat') {
-      // Stream for chat
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -142,7 +150,6 @@ Use emojis. Keep answers practical and actionable. If unsure, say so and recomme
         headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
       });
     } else {
-      // Non-streaming for structured responses
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -170,7 +177,6 @@ Use emojis. Keep answers practical and actionable. If unsure, say so and recomme
       const data = await response.json();
       const content = data.choices?.[0]?.message?.content || "";
       
-      // Try to parse as JSON
       try {
         const cleaned = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
         const parsed = JSON.parse(cleaned);

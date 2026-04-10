@@ -45,6 +45,9 @@
     "crop_advisor": "Crop Advisor",
     "recent_activity": "Recent Activity",
     "no_activity": "No recent activity yet",
+    "sync_field_location": "Sync My Field Location",
+    "syncing_location": "Detecting your field location...",
+    "verified_location": "Verified",
     "refresh": "Refresh"
   },
   "diagnose": {
@@ -68,7 +71,16 @@
     "ai_label": "🤖 AI Generated — Please confirm with local agriculture expert",
     "share_whatsapp": "Share on WhatsApp",
     "analysis_failed": "AI analysis failed. Please try again.",
-    "camera_tip": "Tip: Hold camera 20-30 cm from the leaf for best results."
+    "camera_tip": "Tip: Hold camera 20-30 cm from the leaf for best results.",
+    "low_confidence_title": "More info needed for accurate diagnosis",
+    "low_confidence_desc": "Please answer a few quick questions to help refine the result.",
+    "diagnostic_progress": "Diagnostic Progress",
+    "refine_diagnosis": "✨ Refine Diagnosis with AI",
+    "refining": "Refining diagnosis...",
+    "diagnosis_refined": "Diagnosis refined with your inputs!",
+    "manual_test_title": "Manual Test Kit Guide",
+    "view_guide": "View Guide",
+    "test_guide_desc": "Follow these steps to manually confirm the diagnosis using simple field tests."
   },
   "crops": {
     "title": "Crop Advisor",

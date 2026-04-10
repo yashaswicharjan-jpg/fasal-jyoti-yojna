@@ -192,7 +192,12 @@ const FarmHistory = () => {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">
                                 <p className="text-xs font-medium text-primary">{t(meta.label)}</p>
-                                <span className="text-[10px] text-muted-foreground">{formatTime(item.created_at)}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] text-muted-foreground">{formatTime(item.created_at)}</span>
+                                  <button onClick={(e) => handleDelete(item.id, e)} className="text-muted-foreground hover:text-destructive transition-colors p-0.5">
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
                               </div>
                               <p className="text-sm text-foreground mt-0.5 line-clamp-2">{item.query}</p>
                               <div className="flex items-center gap-1 mt-2 text-xs text-primary font-medium">

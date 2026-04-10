@@ -221,7 +221,11 @@
     "crop_advisor": "पीक सल्लागार",
     "chat": "किसान दोस्त चॅट",
     "irrigation": "सिंचन",
-    "fertilizer": "खत"
+    "fertilizer": "खत",
+    "delete": "हटवा",
+    "deleted": "इतिहास हटवला",
+    "delete_failed": "हटवण्यात अयशस्वी",
+    "auto_cleanup": "जुने रेकॉर्ड (28+ दिवस) आपोआप हटवले जातात"
   },
   "sidebar": {
     "govt_schemes": "सरकारी योजना",

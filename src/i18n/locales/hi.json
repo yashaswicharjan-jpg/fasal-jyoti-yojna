@@ -169,7 +169,11 @@
     "crop_advisor": "फसल सलाहकार",
     "chat": "किसान दोस्त चैट",
     "irrigation": "सिंचाई",
-    "fertilizer": "उर्वरक"
+    "fertilizer": "उर्वरक",
+    "delete": "हटाएं",
+    "deleted": "इतिहास हटा दिया गया",
+    "delete_failed": "हटाने में विफल",
+    "auto_cleanup": "पुराने रिकॉर्ड (28+ दिन) स्वचालित रूप से हटा दिए जाते हैं"
   },
   "sidebar": {
     "govt_schemes": "सरकारी योजनाएं",

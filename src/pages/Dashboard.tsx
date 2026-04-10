@@ -100,7 +100,7 @@ const Dashboard = () => {
   const heatAlert = dailyData?.temperature_2m_max?.slice(0, 3).every((t: number) => t > 40);
 
   return (
-    <div className="ether-bg pb-20">
+    <div className="ether-bg pb-20 bg-green-50">
       <TopBar />
       <main className="px-4 py-4 max-w-lg mx-auto space-y-5">
         {/* Welcome */}

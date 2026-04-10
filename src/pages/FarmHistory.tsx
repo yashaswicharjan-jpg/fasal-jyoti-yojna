@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ChevronRight, Leaf, Droplets, Wheat, MessageCircle, FlaskConical, Bug } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Leaf, Droplets, Wheat, MessageCircle, FlaskConical, Bug, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '@/components/TopBar';
 import GlassCard from '@/components/GlassCard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import ReactMarkdown from 'react-markdown';
+import { toast } from 'sonner';
 
 const CATEGORY_META: Record<string, { icon: typeof Leaf; label: string; color: string }> = {
   disease_detection: { icon: Bug, label: 'history.disease_detection', color: 'text-destructive' },
@@ -31,6 +32,16 @@ const FarmHistory = () => {
     if (!user) return;
     const fetchHistory = async () => {
       setLoading(true);
+
+      // Auto-delete records older than 28 days
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - 28);
+      await supabase
+        .from('ai_chat_history')
+        .delete()
+        .eq('user_id', user.id)
+        .lt('created_at', cutoffDate.toISOString());
+
       const { data } = await supabase
         .from('ai_chat_history')
         .select('*')
@@ -42,6 +53,18 @@ const FarmHistory = () => {
     };
     fetchHistory();
   }, [user]);
+
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const { error } = await supabase.from('ai_chat_history').delete().eq('id', id);
+    if (error) {
+      toast.error(t('history.delete_failed') || 'Failed to delete');
+      return;
+    }
+    setHistory(prev => prev.filter(h => h.id !== id));
+    if (selectedItem?.id === id) setSelectedItem(null);
+    toast.success(t('history.deleted') || 'Deleted');
+  };
 
   const uniqueCategories = [...new Set(history.map(h => h.category).filter(Boolean))];
   const filteredHistory = filter === 'all' ? history : history.filter(h => h.category === filter);
@@ -71,9 +94,14 @@ const FarmHistory = () => {
       <div className="min-h-screen bg-background pb-20">
         <TopBar title={t('history.detail_title')} />
         <main className="px-4 py-4 max-w-lg mx-auto space-y-4">
-          <button onClick={() => setSelectedItem(null)} className="flex items-center gap-1 text-sm text-muted-foreground">
-            <ArrowLeft size={16} /> {t('crops.back')}
-          </button>
+          <div className="flex items-center justify-between">
+            <button onClick={() => setSelectedItem(null)} className="flex items-center gap-1 text-sm text-muted-foreground">
+              <ArrowLeft size={16} /> {t('crops.back')}
+            </button>
+            <button onClick={(e) => handleDelete(selectedItem.id, e)} className="flex items-center gap-1 text-sm text-destructive hover:text-destructive/80 transition-colors">
+              <Trash2 size={16} /> {t('history.delete') || 'Delete'}
+            </button>
+          </div>
 
           <GlassCard className="space-y-3">
             <div className="flex items-center gap-3">
@@ -164,7 +192,12 @@ const FarmHistory = () => {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">
                                 <p className="text-xs font-medium text-primary">{t(meta.label)}</p>
-                                <span className="text-[10px] text-muted-foreground">{formatTime(item.created_at)}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] text-muted-foreground">{formatTime(item.created_at)}</span>
+                                  <button onClick={(e) => handleDelete(item.id, e)} className="text-muted-foreground hover:text-destructive transition-colors p-0.5">
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
                               </div>
                               <p className="text-sm text-foreground mt-0.5 line-clamp-2">{item.query}</p>
                               <div className="flex items-center gap-1 mt-2 text-xs text-primary font-medium">

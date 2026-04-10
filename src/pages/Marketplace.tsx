@@ -164,7 +164,7 @@ const Marketplace = () => {
   ];
 
   return (
-    <div className="ether-bg pb-20">
+    <div className="ether-bg pb-20 bg-border">
       <TopBar />
       <main className="px-4 py-4 max-w-lg mx-auto space-y-5">
         <FloatingSection index={0} float="none">
